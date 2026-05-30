@@ -3533,11 +3533,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/my/Desktop/Porfolio_2026/backend/PortfolioAdmin.Api.csproj",
+      "projectUniqueName": "/Users/my/Documents/GitHub/Demo-2026/backend/PortfolioAdmin.Api.csproj",
       "projectName": "PortfolioAdmin.Api",
-      "projectPath": "/Users/my/Desktop/Porfolio_2026/backend/PortfolioAdmin.Api.csproj",
+      "projectPath": "/Users/my/Documents/GitHub/Demo-2026/backend/PortfolioAdmin.Api.csproj",
       "packagesPath": "/Users/my/.nuget/packages/",
-      "outputPath": "/Users/my/Desktop/Porfolio_2026/backend/obj/",
+      "outputPath": "/Users/my/Documents/GitHub/Demo-2026/backend/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/my/.nuget/NuGet/NuGet.Config"

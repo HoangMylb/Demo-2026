@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Nq3OA1EWW4Q=",
+  "dgSpecHash": "46WJ3lZFoX0=",
   "success": true,
-  "projectFilePath": "/Users/my/Desktop/Porfolio_2026/backend/PortfolioAdmin.Api.csproj",
+  "projectFilePath": "/Users/my/Documents/GitHub/Demo-2026/backend/PortfolioAdmin.Api.csproj",
   "expectedPackageFiles": [
     "/Users/my/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/my/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/9.0.0/microsoft.aspnetcore.authentication.jwtbearer.9.0.0.nupkg.sha512",
