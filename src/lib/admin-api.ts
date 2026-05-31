@@ -1,6 +1,6 @@
 import type { AdminProduct, AdminSession, AdminStats, AdminUser, ProductPayload, UserAccessPayload } from '../types/admin';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
 const AUTH_STORAGE_KEY = 'luma-auth-token';
 
 interface LoginResponse {

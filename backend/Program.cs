@@ -46,6 +46,21 @@ builder.Services.AddCors(options =>
   });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowVercel",
+        policy =>
+        {
+            policy.WithOrigins(
+                    "https://hoangmydemo.online", 
+                    "https://www.hoangmydemo.online"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // Chú ý: Cần cái này nếu FE của mày có gửi Token/Cookie
+        });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
