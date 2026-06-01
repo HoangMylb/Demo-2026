@@ -75,7 +75,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
     var serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
     Response.Cookies.Append(AuthCookieName, serializedToken, BuildCookieOptions(token.ValidTo));
 
-    return Ok(new LoginResponseDto(
+    return this.ApiOk(new LoginResponseDto(
       user.Email,
       user.UserName,
       user.Role
@@ -100,7 +100,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
       return Unauthorized();
     }
 
-    return Ok(new SessionDto(email, userName, role));
+    return this.ApiOk(new SessionDto(email, userName, role));
   }
 
   [Authorize]

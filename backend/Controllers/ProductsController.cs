@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Dtos;
+using Backend.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,7 @@ public class ProductsController(AppDbContext context) : ControllerBase
       ))
       .ToListAsync();
 
-    return Ok(products);
+    return this.ApiOk(products);
   }
 
   [HttpGet("{id:int}")]
@@ -54,6 +55,6 @@ public class ProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstOrDefaultAsync();
 
-    return product is null ? NotFound() : Ok(product);
+    return product is null ? NotFound() : this.ApiOk(product);
   }
 }

@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Dtos;
+using Backend.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       ))
       .ToListAsync();
 
-    return Ok(users);
+    return this.ApiOk(users);
   }
 
   [HttpPatch("{id:int}/access")]
@@ -95,7 +96,7 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
 
     await _context.SaveChangesAsync();
 
-    return Ok(new AdminUserDto(
+    return this.ApiOk(new AdminUserDto(
       user.Id,
       user.FullName,
       user.UserName,

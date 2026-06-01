@@ -2,6 +2,12 @@ import type { AdminProduct, AdminSession, AdminStats, AdminUser, ProductPayload,
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
 
+interface ApiEnvelope<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
 interface LoginResponse {
   email: string;
   userName: string;
@@ -53,8 +59,8 @@ export async function loginAdmin(email: string, password: string) {
     throw new Error(`Login failed with status ${response.status}.`);
   }
 
-  const data = (await response.json()) as LoginResponse;
-  return mapSession(data);
+  const payload = (await response.json()) as ApiEnvelope<LoginResponse>;
+  return mapSession(payload.data);
 }
 
 export async function registerAdmin(fullName: string, email: string, password: string) {
@@ -76,8 +82,8 @@ export async function registerAdmin(fullName: string, email: string, password: s
     throw new Error(`Register failed with status ${response.status}.`);
   }
 
-  const data = (await response.json()) as RegisterResponse;
-  return mapSession(data);
+  const payload = (await response.json()) as ApiEnvelope<RegisterResponse>;
+  return mapSession(payload.data);
 }
 
 async function getSessionResponse() {
@@ -93,8 +99,8 @@ async function getSessionResponse() {
     throw new Error(`Session request failed with status ${response.status}.`);
   }
 
-  const data = (await response.json()) as LoginResponse;
-  return mapSession(data);
+  const payload = (await response.json()) as ApiEnvelope<LoginResponse>;
+  return mapSession(payload.data);
 }
 
 async function parseJsonResponse<T>(response: Response) {
@@ -110,7 +116,8 @@ async function parseJsonResponse<T>(response: Response) {
     throw new Error(`Request failed with status ${response.status}.`);
   }
 
-  return response.json() as Promise<T>;
+  const payload = (await response.json()) as ApiEnvelope<T>;
+  return payload.data;
 }
 
 async function parseVoidResponse(response: Response) {

@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Dtos;
+using Backend.Extensions;
 using Backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
       ))
       .ToListAsync();
 
-    return Ok(products);
+    return this.ApiOk(products);
   }
 
   [HttpGet("{id:int}")]
@@ -57,7 +58,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstOrDefaultAsync();
 
-    return product is null ? NotFound() : Ok(product);
+    return product is null ? NotFound() : this.ApiOk(product);
   }
 
   [HttpPost]
@@ -100,7 +101,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstAsync();
 
-    return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+    return this.ApiCreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
   }
 
   [HttpPut("{id:int}")]
@@ -144,7 +145,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstAsync();
 
-    return Ok(updatedProduct);
+    return this.ApiOk(updatedProduct);
   }
 
   [HttpDelete("{id:int}")]

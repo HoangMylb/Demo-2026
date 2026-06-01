@@ -1,5 +1,6 @@
 using Backend.Data;
 using Backend.Dtos;
+using Backend.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,6 @@ public class AdminDashboardController(AppDbContext context) : ControllerBase
     var totalUsers = await _context.Users.CountAsync();
     var totalProducts = await _context.Products.CountAsync();
 
-    return Ok(new AdminStatsDto(totalUsers, totalProducts));
+    return this.ApiOk(new AdminStatsDto(totalUsers, totalProducts));
   }
 }

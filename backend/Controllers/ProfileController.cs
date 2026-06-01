@@ -23,7 +23,7 @@ public class ProfileController(AppDbContext context) : ControllerBase
       return Unauthorized();
     }
 
-    return Ok(MapProfile(user));
+    return this.ApiOk(MapProfile(user));
   }
 
   [HttpPut]
@@ -56,7 +56,7 @@ public class ProfileController(AppDbContext context) : ControllerBase
 
     await _context.SaveChangesAsync();
 
-    return Ok(MapProfile(user));
+    return this.ApiOk(MapProfile(user));
   }
 
   private async Task<Backend.Models.User?> FindCurrentUserAsync()

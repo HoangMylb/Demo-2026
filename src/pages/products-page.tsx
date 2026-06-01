@@ -28,7 +28,7 @@ export function ProductsPage({ products, onViewDetails, onAddToCart }: ProductsP
 
       return matchesCategory && matchesSearch;
     });
-  }, [search, selectedCategory]);
+  }, [products, search, selectedCategory]);
 
   useEffect(() => {
     setCurrentPage(1);

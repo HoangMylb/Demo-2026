@@ -2,6 +2,12 @@ import type { ProductApiResponse, ProductType } from '../types/product';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
 
+interface ApiEnvelope<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
 const accentByCategory: Record<ProductType['category'], string> = {
   Audio: 'from-sky-400 to-indigo-500',
   Wearables: 'from-fuchsia-400 to-rose-500',
@@ -45,7 +51,8 @@ async function parseProductResponse(response: Response) {
     throw new Error(`Storefront products request failed with status ${response.status}.`);
   }
 
-  return response.json();
+  const payload = (await response.json()) as ApiEnvelope<ProductApiResponse | ProductApiResponse[]>;
+  return payload.data;
 }
 
 export async function getStorefrontProducts(): Promise<ProductType[]> {
