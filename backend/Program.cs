@@ -53,11 +53,12 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(
                     "https://hoangmydemo.online", 
-                    "https://www.hoangmydemo.online"
+                    "https://www.hoangmydemo.online",
+                    "https://demo-2026-rho.vercel.app" // Thêm cả cái này vào cho chắc cốp
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowCredentials(); // Chú ý: Cần cái này nếu FE của mày có gửi Token/Cookie
+                .AllowCredentials(); 
         });
 });
 
@@ -75,9 +76,9 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI();
 }
-
+app.UseRouting();
 app.UseHttpsRedirection();
-app.UseCors("Frontend");
+app.UseCors("AllowVercel");
 app.UseAuthentication();
 app.UseAuthorization();
 
