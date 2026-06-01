@@ -4,7 +4,7 @@ import { MiniCart } from './components/cart/mini-cart';
 import { Toast } from './components/feedback/toast';
 import { Navbar } from './components/layout/navbar';
 import { AdminRouteShell } from './components/admin/admin-route-shell';
-import { clearAdminSession, getStoredAdminSession } from './lib/admin-api';
+import { getCurrentSession, logoutAdmin } from './lib/admin-api';
 import { getStorefrontProductById, getStorefrontProducts } from './lib/storefront-api';
 import { useThemeEffect } from './hooks/use-theme-effect';
 import { AdminDashboardRoute } from './pages/admin-dashboard-route';
@@ -193,19 +193,24 @@ function App() {
 
   const [toastVisible, setToastVisible] = useState(false);
   const [lastAddedProductName, setLastAddedProductName] = useState('Product');
-  const [session, setSession] = useState<AdminSession | null>(() => getStoredAdminSession());
+  const [session, setSession] = useState<AdminSession | null>(null);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
 
-  const syncSession = () => {
-    setSession(getStoredAdminSession());
+  const syncSession = async () => {
+    const nextSession = await getCurrentSession();
+    setSession(nextSession);
   };
 
-  const handleLogout = () => {
-    clearAdminSession();
+  const handleLogout = async () => {
+    await logoutAdmin();
     toggleCart(false);
     setSession(null);
   };
+
+  useEffect(() => {
+    void syncSession();
+  }, []);
 
   useEffect(() => {
     if (!toastVisible) {
@@ -218,7 +223,7 @@ function App() {
 
   const handleAddToCart = (product: ProductType) => {
     addItem(product);
-    if (session?.token) {
+    if (session?.isAuthenticated) {
       toggleCart(true);
     }
     setLastAddedProductName(product.name);
@@ -266,7 +271,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      <MiniCart visible={Boolean(session?.token)} />
+      <MiniCart visible={Boolean(session?.isAuthenticated)} />
       <Toast visible={toastVisible} message={`${lastAddedProductName} was added to your cart.`} />
     </div>
   );

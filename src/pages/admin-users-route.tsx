@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AdminStateCard } from '../components/admin/admin-state-card';
 import { Button } from '../components/ui/button';
-import { getAdminUsers, updateAdminUserAccess } from '../lib/admin-api';
+import { deleteAdminUser, getAdminUsers, updateAdminUserAccess } from '../lib/admin-api';
 import { AdminUsersPage } from './admin-users-page';
 import type { AdminUser } from '../types/admin';
 
@@ -42,6 +42,16 @@ export function AdminUsersRoute() {
     await refreshUsers();
   };
 
+  const handleUpdateUser = async (user: AdminUser, payload: { fullName: string; userName: string; email: string; role: 'Admin' | 'User' }) => {
+    await updateAdminUserAccess(user.id, payload);
+    await refreshUsers();
+  };
+
+  const handleDeleteUser = async (user: AdminUser) => {
+    await deleteAdminUser(user.id);
+    await refreshUsers();
+  };
+
   if (loading && users.length === 0) {
     return <AdminStateCard title="Loading users" description="Fetching user accounts and access states for the admin table." />;
   }
@@ -60,5 +70,5 @@ export function AdminUsersRoute() {
     );
   }
 
-  return <AdminUsersPage users={users} onToggleLock={handleToggleLock} onToggleApproval={handleToggleApproval} />;
+  return <AdminUsersPage users={users} onUpdateUser={handleUpdateUser} onToggleLock={handleToggleLock} onToggleApproval={handleToggleApproval} onDeleteUser={handleDeleteUser} />;
 }

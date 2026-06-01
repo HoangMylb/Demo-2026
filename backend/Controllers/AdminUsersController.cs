@@ -43,6 +43,46 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       return NotFound();
     }
 
+    if (!string.IsNullOrWhiteSpace(request.Email))
+    {
+      var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+      var emailTaken = await _context.Users.AnyAsync(item => item.Id != id && item.Email.ToLower() == normalizedEmail);
+      if (emailTaken)
+      {
+        return Conflict(new { message = "This email is already in use." });
+      }
+
+      user.Email = normalizedEmail;
+    }
+
+    if (!string.IsNullOrWhiteSpace(request.FullName))
+    {
+      user.FullName = request.FullName.Trim();
+    }
+
+    if (!string.IsNullOrWhiteSpace(request.UserName))
+    {
+      var normalizedUserName = request.UserName.Trim().ToLowerInvariant();
+      var userNameTaken = await _context.Users.AnyAsync(item => item.Id != id && item.UserName.ToLower() == normalizedUserName);
+      if (userNameTaken)
+      {
+        return Conflict(new { message = "This username is already in use." });
+      }
+
+      user.UserName = normalizedUserName;
+    }
+
+    if (!string.IsNullOrWhiteSpace(request.Role))
+    {
+      var normalizedRole = request.Role.Trim();
+      if (normalizedRole != "Admin" && normalizedRole != "User")
+      {
+        return BadRequest(new { message = "Role must be Admin or User." });
+      }
+
+      user.Role = normalizedRole;
+    }
+
     if (request.IsLocked.HasValue)
     {
       user.IsLocked = request.IsLocked.Value;
@@ -65,5 +105,20 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       user.IsApproved,
       user.CreatedAtUtc
     ));
+  }
+
+  [HttpDelete("{id:int}")]
+  public async Task<IActionResult> DeleteUser(int id)
+  {
+    var user = await _context.Users.FirstOrDefaultAsync(item => item.Id == id);
+    if (user is null)
+    {
+      return NotFound();
+    }
+
+    _context.Users.Remove(user);
+    await _context.SaveChangesAsync();
+
+    return NoContent();
   }
 }

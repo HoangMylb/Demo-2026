@@ -18,11 +18,12 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const isLoggedIn = Boolean(session?.token);
+  const isLoggedIn = Boolean(session?.isAuthenticated);
+  const isAdmin = session?.role?.toLowerCase() === 'admin';
   const navigationItems = [
     ['/', 'Home'],
     ['/products', 'Products'],
-    ['/admin/login', 'Admin'],
+    ...(isAdmin ? ([['/admin/login', 'Admin']] as const) : []),
   ] as const;
 
   useEffect(() => {

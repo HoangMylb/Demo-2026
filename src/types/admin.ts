@@ -31,6 +31,7 @@ export interface ProductPayload {
 export interface AdminUser {
   id: number;
   fullName: string;
+  userName: string;
   email: string;
   role: string;
   isLocked: boolean;
@@ -39,12 +40,34 @@ export interface AdminUser {
 }
 
 export interface UserAccessPayload {
+  fullName?: string;
+  userName?: string;
+  email?: string;
+  role?: 'Admin' | 'User';
   isLocked?: boolean;
   isApproved?: boolean;
 }
 
+export interface Profile {
+  id: number;
+  fullName: string;
+  userName: string;
+  email: string;
+  role: string;
+  isLocked: boolean;
+  isApproved: boolean;
+  createdAtUtc: string;
+}
+
+export interface ProfileUpdatePayload {
+  fullName: string;
+  userName: string;
+  email: string;
+}
+
 export interface AdminSession {
-  token: string;
+  isAuthenticated: boolean;
   role: string | null;
   email: string | null;
+  userName: string | null;
 }

@@ -1,89 +1,40 @@
-import type { AdminProduct, AdminSession, AdminStats, AdminUser, ProductPayload, UserAccessPayload } from '../types/admin';
+import type { AdminProduct, AdminSession, AdminStats, AdminUser, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
-const AUTH_STORAGE_KEY = 'luma-auth-token';
 
 interface LoginResponse {
-  token: string;
   email: string;
   userName: string;
   role: string;
 }
 
 interface RegisterResponse {
-  token: string;
   email: string;
   userName: string;
   role: string;
 }
 
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  const parts = token.split('.');
-  if (parts.length < 2) {
-    return null;
-  }
-
-  try {
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
-    const decoded = window.atob(padded);
-    return JSON.parse(decoded) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-function extractClaim(payload: Record<string, unknown> | null, keys: string[]) {
-  if (!payload) {
-    return null;
-  }
-
-  for (const key of keys) {
-    const value = payload[key];
-    if (typeof value === 'string' && value.length > 0) {
-      return value;
-    }
-  }
-
+export function getStoredAdminSession(): AdminSession | null {
   return null;
 }
 
-export function getStoredAdminSession(): AdminSession | null {
-  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as { token?: string };
-    if (!parsed.token) {
-      return null;
-    }
-
-    const payload = decodeJwtPayload(parsed.token);
-
-    return {
-      token: parsed.token,
-      role: extractClaim(payload, ['role', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role']),
-      email: extractClaim(payload, ['email', 'unique_name', 'sub']),
-    };
-  } catch {
-    return null;
-  }
-}
-
-export function storeAdminSession(token: string) {
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token }));
-  return getStoredAdminSession();
+function mapSession(data: LoginResponse): AdminSession {
+  return {
+    isAuthenticated: true,
+    role: data.role,
+    email: data.email,
+    userName: data.userName,
+  };
 }
 
 export function clearAdminSession() {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  return undefined;
 }
 
 export async function loginAdmin(email: string, password: string) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -103,12 +54,13 @@ export async function loginAdmin(email: string, password: string) {
   }
 
   const data = (await response.json()) as LoginResponse;
-  return storeAdminSession(data.token);
+  return mapSession(data);
 }
 
 export async function registerAdmin(fullName: string, email: string, password: string) {
   const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -125,17 +77,24 @@ export async function registerAdmin(fullName: string, email: string, password: s
   }
 
   const data = (await response.json()) as RegisterResponse;
-  return storeAdminSession(data.token);
+  return mapSession(data);
 }
 
-function getAuthHeaders() {
-  const session = getStoredAdminSession();
+async function getSessionResponse() {
+  const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+    credentials: 'include',
+  });
 
-  if (!session?.token) {
-    return {} as Record<string, string>;
+  if (response.status === 401) {
+    return null;
   }
 
-  return { Authorization: `Bearer ${session.token}` };
+  if (!response.ok) {
+    throw new Error(`Session request failed with status ${response.status}.`);
+  }
+
+  const data = (await response.json()) as LoginResponse;
+  return mapSession(data);
 }
 
 async function parseJsonResponse<T>(response: Response) {
@@ -172,13 +131,9 @@ async function request<T>(path: string, init?: RequestInit) {
   const headers = new Headers(init?.headers);
   headers.set('Content-Type', 'application/json');
 
-  const authHeaders = getAuthHeaders();
-  Object.entries(authHeaders).forEach(([key, value]) => {
-    headers.set(key, value);
-  });
-
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: 'include',
     headers,
   });
 
@@ -188,13 +143,9 @@ async function request<T>(path: string, init?: RequestInit) {
 async function requestWithoutJson(path: string, init?: RequestInit) {
   const headers = new Headers(init?.headers);
 
-  const authHeaders = getAuthHeaders();
-  Object.entries(authHeaders).forEach(([key, value]) => {
-    headers.set(key, value);
-  });
-
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: 'include',
     headers,
   });
 
@@ -227,4 +178,24 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function updateAdminUserAccess(id: number, payload: UserAccessPayload): Promise<AdminUser> {
   return request<AdminUser>(`/api/admin/users/${id}/access`, { method: 'PATCH', body: JSON.stringify(payload) });
+}
+
+export async function deleteAdminUser(id: number): Promise<void> {
+  await requestWithoutJson(`/api/admin/users/${id}`, { method: 'DELETE' });
+}
+
+export async function getProfile(): Promise<Profile> {
+  return request<Profile>('/api/profile');
+}
+
+export async function updateProfile(payload: ProfileUpdatePayload): Promise<Profile> {
+  return request<Profile>('/api/profile', { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export async function getCurrentSession(): Promise<AdminSession | null> {
+  return getSessionResponse();
+}
+
+export async function logoutAdmin(): Promise<void> {
+  await requestWithoutJson('/api/auth/logout', { method: 'POST' });
 }

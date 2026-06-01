@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using Backend.Data;
 using Backend.Dtos;
+using Backend.Extensions;
 using Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +18,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
 {
   private readonly AppDbContext _context = context;
   private readonly IConfiguration _configuration = configuration;
+  private const string AuthCookieName = "demo2026_auth";
 
   [HttpPost("register")]
   public async Task<ActionResult<LoginResponseDto>> Register([FromBody] RegisterRequestDto request)
@@ -68,6 +71,48 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
       return Forbid();
     }
 
+    var token = CreateJwt(user);
+    var serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
+    Response.Cookies.Append(AuthCookieName, serializedToken, BuildCookieOptions(token.ValidTo));
+
+    return Ok(new LoginResponseDto(
+      user.Email,
+      user.UserName,
+      user.Role
+    ));
+  }
+
+  [Authorize]
+  [HttpGet("me")]
+  public ActionResult<SessionDto> Me()
+  {
+    if (User.Identity?.IsAuthenticated != true)
+    {
+      return Unauthorized();
+    }
+
+    var email = User.GetUserEmail();
+    var userName = User.GetUserName();
+    var role = User.GetUserRole();
+
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(role))
+    {
+      return Unauthorized();
+    }
+
+    return Ok(new SessionDto(email, userName, role));
+  }
+
+  [Authorize]
+  [HttpPost("logout")]
+  public IActionResult Logout()
+  {
+    Response.Cookies.Delete(AuthCookieName, BuildCookieOptions(DateTimeOffset.UtcNow));
+    return NoContent();
+  }
+
+  private JwtSecurityToken CreateJwt(Backend.Models.User user)
+  {
     var jwtSection = _configuration.GetSection("Jwt");
     var issuer = jwtSection["Issuer"] ?? "PortfolioAdmin";
     var audience = jwtSection["Audience"] ?? "PortfolioAdminClient";
@@ -86,19 +131,21 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
       SecurityAlgorithms.HmacSha256
     );
 
-    var token = new JwtSecurityToken(
+    return new JwtSecurityToken(
       issuer: issuer,
       audience: audience,
       claims: claims,
       expires: DateTime.UtcNow.AddHours(8),
       signingCredentials: signingCredentials
     );
-
-    return Ok(new LoginResponseDto(
-      new JwtSecurityTokenHandler().WriteToken(token),
-      user.Email,
-      user.UserName,
-      user.Role
-    ));
   }
+
+  private static CookieOptions BuildCookieOptions(DateTimeOffset expiresAt) => new()
+  {
+    HttpOnly = true,
+    Secure = true,
+    SameSite = SameSiteMode.None,
+    Expires = expiresAt,
+    Path = "/"
+  };
 }

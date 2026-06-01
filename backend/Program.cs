@@ -35,6 +35,24 @@ builder.Services
       ValidAudience = audience,
       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
+
+    options.Events = new JwtBearerEvents
+    {
+      OnMessageReceived = context =>
+      {
+        if (!string.IsNullOrWhiteSpace(context.Token))
+        {
+          return Task.CompletedTask;
+        }
+
+        if (context.Request.Cookies.TryGetValue("demo2026_auth", out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+        {
+          context.Token = cookieToken;
+        }
+
+        return Task.CompletedTask;
+      }
+    };
   });
 
 builder.Services.AddAuthorization();

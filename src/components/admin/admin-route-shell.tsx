@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AdminLayout, type AdminView } from './admin-layout';
-import { clearAdminSession, getStoredAdminSession } from '../../lib/admin-api';
+import { getCurrentSession, logoutAdmin } from '../../lib/admin-api';
 import type { AdminSession } from '../../types/admin';
 
 const routeToView: Record<string, AdminView> = {
@@ -13,15 +13,19 @@ const routeToView: Record<string, AdminView> = {
 export function AdminRouteShell() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [adminSession, setAdminSession] = useState<AdminSession | null>(() => getStoredAdminSession());
+  const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
 
   useEffect(() => {
-    const session = getStoredAdminSession();
-    setAdminSession(session);
+    const loadSession = async () => {
+      const session = await getCurrentSession();
+      setAdminSession(session);
 
-    if (!session?.token) {
-      navigate('/admin/login', { replace: true });
-    }
+      if (!session?.isAuthenticated || session.role?.toLowerCase() !== 'admin') {
+        navigate('/admin/login', { replace: true });
+      }
+    };
+
+    void loadSession();
   }, [navigate]);
 
   const activeView = useMemo<AdminView>(() => routeToView[location.pathname] ?? 'dashboard', [location.pathname]);
@@ -32,8 +36,8 @@ export function AdminRouteShell() {
     navigate(nextPath);
   };
 
-  const handleExit = () => {
-    clearAdminSession();
+  const handleExit = async () => {
+    await logoutAdmin();
     setAdminSession(null);
     navigate('/', { replace: true });
   };
