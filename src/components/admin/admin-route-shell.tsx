@@ -20,7 +20,7 @@ export function AdminRouteShell() {
     setAdminSession(session);
 
     if (!session?.token) {
-      navigate('/auth', { replace: true });
+      navigate('/admin/login', { replace: true });
     }
   }, [navigate]);
 

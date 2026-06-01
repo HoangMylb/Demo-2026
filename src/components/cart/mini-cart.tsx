@@ -4,13 +4,21 @@ import { useCartStore } from '../../stores/cart-store';
 import { formatCurrency } from '../../utils/format';
 import { Button } from '../ui/button';
 
-export function MiniCart() {
+interface MiniCartProps {
+  visible: boolean;
+}
+
+export function MiniCart({ visible }: MiniCartProps) {
   const isOpen = useCartStore((state) => state.isOpen);
   const items = useCartStore((state) => state.items);
   const toggleCart = useCartStore((state) => state.toggleCart);
   const removeItem = useCartStore((state) => state.removeItem);
   const totalPrice = useCartStore((state) => state.totalPrice);
   const clearCart = useCartStore((state) => state.clearCart);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
