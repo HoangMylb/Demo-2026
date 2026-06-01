@@ -1,11 +1,13 @@
 import { Search } from 'lucide-react';
-import { categories } from '../../data/products';
+
+export const productCategories = ['All', 'Audio', 'Wearables', 'Workspace', 'Accessories'] as const;
+export type ProductCategoryFilter = (typeof productCategories)[number];
 
 interface ProductFiltersProps {
   search: string;
-  selectedCategory: (typeof categories)[number];
+  selectedCategory: ProductCategoryFilter;
   onSearchChange: (value: string) => void;
-  onCategoryChange: (value: (typeof categories)[number]) => void;
+  onCategoryChange: (value: ProductCategoryFilter) => void;
 }
 
 export function ProductFilters({ search, selectedCategory, onSearchChange, onCategoryChange }: ProductFiltersProps) {
@@ -23,7 +25,7 @@ export function ProductFilters({ search, selectedCategory, onSearchChange, onCat
         </label>
 
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => {
+          {productCategories.map((category) => {
             const active = selectedCategory === category;
             return (
               <button

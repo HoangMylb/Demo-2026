@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { categories, products } from '../data/products';
 import type { ProductType } from '../types/product';
-import { ProductFilters } from '../components/product/product-filters';
+import { ProductFilters, type ProductCategoryFilter } from '../components/product/product-filters';
 import { Pagination } from '../components/product/pagination';
 import { ProductCard } from '../components/product/product-card';
 
 const PRODUCTS_PER_PAGE = 4;
 
 interface ProductsPageProps {
+  products: ProductType[];
   onViewDetails: (product: ProductType) => void;
   onAddToCart: (product: ProductType) => void;
 }
 
-export function ProductsPage({ onViewDetails, onAddToCart }: ProductsPageProps) {
+export function ProductsPage({ products, onViewDetails, onAddToCart }: ProductsPageProps) {
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<(typeof categories)[number]>('All');
+  const [selectedCategory, setSelectedCategory] = useState<ProductCategoryFilter>('All');
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredProducts = useMemo(() => {

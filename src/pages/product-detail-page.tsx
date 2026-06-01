@@ -5,11 +5,20 @@ import { formatCurrency } from '../utils/format';
 import { Button } from '../components/ui/button';
 
 interface ProductDetailPageProps {
-  product: ProductType;
+  product: ProductType | null;
   onAddToCart: (product: ProductType) => void;
 }
 
 export function ProductDetailPage({ product, onAddToCart }: ProductDetailPageProps) {
+  if (!product) {
+    return (
+      <section className="rounded-[2rem] border border-dashed border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
+        <h2 className="text-2xl font-semibold text-slate-950 dark:text-white">Product not found</h2>
+        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">The requested product could not be loaded from the storefront API.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
       <motion.div

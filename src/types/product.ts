@@ -13,3 +13,15 @@ export interface ProductType {
 export interface CartItem extends ProductType {
   quantity: number;
 }
+
+export interface ProductApiResponse {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  categoryId: number;
+  categoryName: string;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+}

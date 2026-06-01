@@ -24,7 +24,7 @@ export function ThemeToggle() {
       <motion.span
         layout
         transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-        animate={{ x: isDark ? 28 : 0 }}
+        animate={{ x: isDark ? 36 : 0 }}
         className="absolute ml-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-white dark:bg-white dark:text-slate-950"
       >
         {isDark ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PortfolioAdmin.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+779c4b00bc852b86aa5172f1d6e1811c1449807f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76cc64d940d69e062cd8b1d69063c57d7085141b")]
 [assembly: System.Reflection.AssemblyProductAttribute("PortfolioAdmin.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PortfolioAdmin.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

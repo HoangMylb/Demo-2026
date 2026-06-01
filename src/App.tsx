@@ -5,7 +5,7 @@ import { Toast } from './components/feedback/toast';
 import { Navbar } from './components/layout/navbar';
 import { AdminRouteShell } from './components/admin/admin-route-shell';
 import { clearAdminSession, getStoredAdminSession } from './lib/admin-api';
-import { products } from './data/products';
+import { getStorefrontProductById, getStorefrontProducts } from './lib/storefront-api';
 import { useThemeEffect } from './hooks/use-theme-effect';
 import { AdminDashboardRoute } from './pages/admin-dashboard-route';
 import { AdminProductsRoute } from './pages/admin-products-route';
@@ -21,9 +21,34 @@ import type { ProductType } from './types/product';
 
 function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const navigate = useNavigate();
+  const [products, setProducts] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProducts = async () => {
+      try {
+        const response = await getStorefrontProducts();
+        if (active) {
+          setProducts(response);
+        }
+      } catch {
+        if (active) {
+          setProducts([]);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <HomePage
+      products={products}
       onExploreProducts={() => navigate('/products')}
       onViewDetails={(product) => navigate(`/products/${product.id}`)}
       onAddToCart={onAddToCart}
@@ -33,9 +58,34 @@ function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => voi
 
 function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const navigate = useNavigate();
+  const [products, setProducts] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProducts = async () => {
+      try {
+        const response = await getStorefrontProducts();
+        if (active) {
+          setProducts(response);
+        }
+      } catch {
+        if (active) {
+          setProducts([]);
+        }
+      }
+    };
+
+    void loadProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <ProductsPage
+      products={products}
       onViewDetails={(product) => navigate(`/products/${product.id}`)}
       onAddToCart={onAddToCart}
     />
@@ -44,7 +94,37 @@ function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) =>
 
 function ProductDetailRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const { productId } = useParams();
-  const product = products.find((item) => item.id === productId) ?? products[0];
+  const [product, setProduct] = useState<ProductType | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProduct = async () => {
+      if (!productId) {
+        if (active) {
+          setProduct(null);
+        }
+        return;
+      }
+
+      try {
+        const response = await getStorefrontProductById(productId);
+        if (active) {
+          setProduct(response);
+        }
+      } catch {
+        if (active) {
+          setProduct(null);
+        }
+      }
+    };
+
+    void loadProduct();
+
+    return () => {
+      active = false;
+    };
+  }, [productId]);
 
   return <ProductDetailPage product={product} onAddToCart={onAddToCart} />;
 }
@@ -112,7 +192,7 @@ function App() {
   useThemeEffect();
 
   const [toastVisible, setToastVisible] = useState(false);
-  const [lastAddedProductName, setLastAddedProductName] = useState(products[0].name);
+  const [lastAddedProductName, setLastAddedProductName] = useState('Product');
   const [session, setSession] = useState<AdminSession | null>(() => getStoredAdminSession());
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);

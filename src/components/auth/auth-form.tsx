@@ -90,7 +90,7 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
       description={
         audience === 'admin'
           ? 'Admin access is separated from the storefront. Use an administrator account such as admin@gmail.com / 123456.'
-          : 'Use your shopper account to unlock the account menu and cart. Example accounts are admin@gmail.com / 123456 and user@gmail.com / 123456.'
+          : 'Use your shopper account to unlock the account menu and cart. Example accounts are user@gmail.com / 123456.'
       }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
