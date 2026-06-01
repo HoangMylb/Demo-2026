@@ -1,4 +1,4 @@
-import { ShoppingBag, UserRound } from 'lucide-react';
+import { Menu, ShoppingBag, UserRound, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
@@ -16,8 +16,14 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const itemCount = useCartStore((state) => state.itemCount);
   const toggleCart = useCartStore((state) => state.toggleCart);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const isLoggedIn = Boolean(session?.token);
+  const navigationItems = [
+    ['/', 'Home'],
+    ['/products', 'Products'],
+    ['/admin/login', 'Admin'],
+  ] as const;
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -29,6 +35,10 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
     window.addEventListener('mousedown', handlePointerDown);
     return () => window.removeEventListener('mousedown', handlePointerDown);
   }, []);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [currentPath]);
 
   const accountActions = isLoggedIn
     ? [
@@ -49,11 +59,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
         </button>
 
         <nav className="hidden gap-2 md:flex">
-          {[
-            ['/', 'Home'],
-            ['/products', 'Products'],
-            ['/admin/login', 'Admin'],
-          ].map(([key, label]) => {
+          {navigationItems.map(([key, label]) => {
             const isActive =
               key === '/'
                 ? currentPath === '/'
@@ -78,6 +84,15 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
         </nav>
 
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((value) => !value)}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-100 md:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileNavOpen}
+          >
+            {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
           <ThemeToggle />
           <div ref={menuRef} className="relative">
             <button
@@ -137,6 +152,36 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
           ) : null}
         </div>
       </div>
+
+      {mobileNavOpen ? (
+        <div className="border-t border-slate-200/70 px-6 pb-5 pt-4 md:hidden dark:border-slate-800/80">
+          <div className="space-y-2 rounded-[1.75rem] border border-slate-200 bg-white p-3 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+            {navigationItems.map(([key, label]) => {
+              const isActive =
+                key === '/'
+                  ? currentPath === '/'
+                  : key === '/admin/login'
+                    ? currentPath.startsWith('/admin')
+                    : currentPath === key || currentPath.startsWith(`${key}/`);
+
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => onNavigate(key)}
+                  className={`flex w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
