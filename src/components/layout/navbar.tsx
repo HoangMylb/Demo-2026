@@ -23,7 +23,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const navigationItems = [
     ['/', 'Home'],
     ['/products', 'Products'],
-    ...(isAdmin ? ([['/admin/login', 'Admin']] as const) : []),
+    ...(isAdmin ? ([['/admin', 'Dashboard']] as const) : []),
   ] as const;
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
             const isActive =
               key === '/'
                 ? currentPath === '/'
-                : key === '/admin/login'
+                : key === '/admin'
                   ? currentPath.startsWith('/admin')
                   : currentPath === key || currentPath.startsWith(`${key}/`);
             return (
@@ -162,7 +162,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
               const isActive =
                 key === '/'
                   ? currentPath === '/'
-                  : key === '/admin/login'
+                  : key === '/admin'
                     ? currentPath.startsWith('/admin')
                     : currentPath === key || currentPath.startsWith(`${key}/`);
 

@@ -7,7 +7,9 @@ import type { AdminCategoryOption, AdminProduct, ProductPayload } from '../types
 
 export function AdminProductsRoute() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,23 +50,33 @@ export function AdminProductsRoute() {
     await loadProducts();
   };
 
-  const handleSubmitProduct = async (values: ProductPayload) => {
+  const handleSubmitProduct = async (values: ProductPayload): Promise<{ message: string }> => {
+    let result;
+
     if (editingProduct) {
-      await updateAdminProduct(editingProduct.id, values);
+      result = await updateAdminProduct(editingProduct.id, values);
     } else {
-      await createAdminProduct(values);
+      result = await createAdminProduct(values);
     }
 
     await refreshProducts();
     setEditingProduct(null);
+    setIsCreateOpen(false);
+    return { message: result.message };
   };
 
-  const handleDeleteProduct = async (productId: number) => {
-    await deleteAdminProduct(productId);
-    await refreshProducts();
+  const handleDeleteProduct = async (productId: number): Promise<{ message: string }> => {
+    setDeletingProductId(productId);
 
-    if (editingProduct?.id === productId) {
-      setEditingProduct(null);
+    try {
+      const result = await deleteAdminProduct(productId);
+      await refreshProducts();
+      if (editingProduct?.id === productId) {
+        setEditingProduct(null);
+      }
+      return result;
+    } finally {
+      setDeletingProductId(null);
     }
   };
 
@@ -90,11 +102,23 @@ export function AdminProductsRoute() {
     <AdminProductsPage
       products={products}
       categoryOptions={categoryOptions}
+      isCreateOpen={isCreateOpen}
       editingProduct={editingProduct}
+      deletingProductId={deletingProductId}
       onSubmitProduct={handleSubmitProduct}
-      onEditProduct={setEditingProduct}
+      onOpenCreate={() => {
+        setEditingProduct(null);
+        setIsCreateOpen(true);
+      }}
+      onEditProduct={(product) => {
+        setIsCreateOpen(false);
+        setEditingProduct(product);
+      }}
       onDeleteProduct={handleDeleteProduct}
-      onCancelEdit={() => setEditingProduct(null)}
+      onCancelEdit={() => {
+        setEditingProduct(null);
+        setIsCreateOpen(false);
+      }}
     />
   );
 }

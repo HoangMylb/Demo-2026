@@ -58,7 +58,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstOrDefaultAsync();
 
-    return product is null ? NotFound() : this.ApiOk(product);
+    return product is null ? this.ApiNotFound("The requested product was not found.") : this.ApiOk(product);
   }
 
   [HttpPost]
@@ -67,7 +67,7 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var categoryExists = await _context.Categories.AnyAsync(category => category.Id == request.CategoryId);
     if (!categoryExists)
     {
-      return BadRequest(new { message = "Category does not exist." });
+      return this.ApiBadRequest("Category does not exist.");
     }
 
     var product = new Product
@@ -110,13 +110,13 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);
     if (product is null)
     {
-      return NotFound();
+      return this.ApiNotFound("The requested product was not found.");
     }
 
     var categoryExists = await _context.Categories.AnyAsync(category => category.Id == request.CategoryId);
     if (!categoryExists)
     {
-      return BadRequest(new { message = "Category does not exist." });
+      return this.ApiBadRequest("Category does not exist.");
     }
 
     product.Name = request.Name;
@@ -154,12 +154,12 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var product = await _context.Products.FirstOrDefaultAsync(item => item.Id == id);
     if (product is null)
     {
-      return NotFound();
+      return this.ApiNotFound("The requested product was not found.");
     }
 
     _context.Products.Remove(product);
     await _context.SaveChangesAsync();
 
-    return NoContent();
+    return this.ApiOk<object?>(null, "Product deleted successfully.");
   }
 }

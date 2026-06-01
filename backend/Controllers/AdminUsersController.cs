@@ -41,8 +41,11 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
     var user = await _context.Users.FirstOrDefaultAsync(item => item.Id == id);
     if (user is null)
     {
-      return NotFound();
+      return this.ApiNotFound("The requested user was not found.");
     }
+
+    var currentAdminEmail = User.GetUserEmail();
+    var isCurrentAdmin = !string.IsNullOrWhiteSpace(currentAdminEmail) && string.Equals(user.Email, currentAdminEmail, StringComparison.OrdinalIgnoreCase);
 
     if (!string.IsNullOrWhiteSpace(request.Email))
     {
@@ -50,7 +53,7 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       var emailTaken = await _context.Users.AnyAsync(item => item.Id != id && item.Email.ToLower() == normalizedEmail);
       if (emailTaken)
       {
-        return Conflict(new { message = "This email is already in use." });
+        return this.ApiConflict("This email is already in use.");
       }
 
       user.Email = normalizedEmail;
@@ -67,7 +70,7 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       var userNameTaken = await _context.Users.AnyAsync(item => item.Id != id && item.UserName.ToLower() == normalizedUserName);
       if (userNameTaken)
       {
-        return Conflict(new { message = "This username is already in use." });
+        return this.ApiConflict("This username is already in use.");
       }
 
       user.UserName = normalizedUserName;
@@ -78,7 +81,12 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
       var normalizedRole = request.Role.Trim();
       if (normalizedRole != "Admin" && normalizedRole != "User")
       {
-        return BadRequest(new { message = "Role must be Admin or User." });
+        return this.ApiBadRequest("Role must be Admin or User.");
+      }
+
+      if (isCurrentAdmin && normalizedRole != "Admin")
+      {
+        return this.ApiBadRequest("You cannot remove your own admin role.");
       }
 
       user.Role = normalizedRole;
@@ -114,12 +122,18 @@ public class AdminUsersController(AppDbContext context) : ControllerBase
     var user = await _context.Users.FirstOrDefaultAsync(item => item.Id == id);
     if (user is null)
     {
-      return NotFound();
+      return this.ApiNotFound("The requested user was not found.");
+    }
+
+    var currentAdminEmail = User.GetUserEmail();
+    if (!string.IsNullOrWhiteSpace(currentAdminEmail) && string.Equals(user.Email, currentAdminEmail, StringComparison.OrdinalIgnoreCase))
+    {
+      return this.ApiBadRequest("You cannot delete your own admin account.");
     }
 
     _context.Users.Remove(user);
     await _context.SaveChangesAsync();
 
-    return NoContent();
+    return this.ApiOk<object?>(null, "User deleted successfully.");
   }
 }

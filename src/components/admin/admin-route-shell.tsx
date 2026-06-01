@@ -43,13 +43,14 @@ export function AdminRouteShell() {
   };
 
   return (
-    <AdminLayout
-      activeView={activeView}
-      onNavigate={handleNavigate}
-      onExit={handleExit}
-      sessionRole={adminSession?.role ?? null}
-      sessionEmail={adminSession?.email ?? null}
-    >
+      <AdminLayout
+        activeView={activeView}
+        onNavigate={handleNavigate}
+        onExit={handleExit}
+        onOpenSettings={() => navigate('/settings')}
+        sessionRole={adminSession?.role ?? null}
+        sessionEmail={adminSession?.email ?? null}
+      >
       <Outlet />
     </AdminLayout>
   );

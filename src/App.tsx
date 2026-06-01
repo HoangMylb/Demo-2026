@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { MiniCart } from './components/cart/mini-cart';
 import { AppErrorBoundary } from './components/feedback/app-error-boundary';
-import { Toast } from './components/feedback/toast';
+import { NotificationProvider, useNotification } from './components/feedback/notification-provider';
 import { Navbar } from './components/layout/navbar';
 import { AdminRouteShell } from './components/admin/admin-route-shell';
 import { getCurrentSession, logoutAdmin } from './lib/admin-api';
@@ -207,14 +207,13 @@ function UnauthorizedRoute({ session, onLogout }: { session: AdminSession | null
   );
 }
 
-function App() {
+function AppContent() {
   useThemeEffect();
 
-  const [toastVisible, setToastVisible] = useState(false);
-  const [lastAddedProductName, setLastAddedProductName] = useState('Product');
   const [session, setSession] = useState<AdminSession | null>(null);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
+  const { notify } = useNotification();
 
   const syncSession = async () => {
     const nextSession = await getCurrentSession();
@@ -231,22 +230,12 @@ function App() {
     void syncSession();
   }, []);
 
-  useEffect(() => {
-    if (!toastVisible) {
-      return;
-    }
-
-    const timeout = window.setTimeout(() => setToastVisible(false), 2200);
-    return () => window.clearTimeout(timeout);
-  }, [toastVisible]);
-
   const handleAddToCart = (product: ProductType) => {
     addItem(product);
     if (session?.isAuthenticated) {
       toggleCart(true);
     }
-    setLastAddedProductName(product.name);
-    setToastVisible(true);
+    notify(`${product.name} was added to your cart.`);
   };
 
   return (
@@ -293,9 +282,16 @@ function App() {
         </Routes>
 
         <MiniCart visible={Boolean(session?.isAuthenticated)} />
-        <Toast visible={toastVisible} message={`${lastAddedProductName} was added to your cart.`} />
       </div>
     </AppErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <NotificationProvider>
+      <AppContent />
+    </NotificationProvider>
   );
 }
 

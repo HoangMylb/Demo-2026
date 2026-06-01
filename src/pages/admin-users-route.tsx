@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AdminStateCard } from '../components/admin/admin-state-card';
 import { Button } from '../components/ui/button';
-import { deleteAdminUser, getAdminUsers, updateAdminUserAccess } from '../lib/admin-api';
+import { deleteAdminUser, getAdminUsers, getCurrentSession, updateAdminUserAccess } from '../lib/admin-api';
 import { AdminUsersPage } from './admin-users-page';
-import type { AdminUser } from '../types/admin';
+import type { AdminSession, AdminUser } from '../types/admin';
 
 export function AdminUsersRoute() {
+  const [session, setSession] = useState<AdminSession | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [busyUserId, setBusyUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,30 +28,59 @@ export function AdminUsersRoute() {
 
   useEffect(() => {
     void loadUsers();
+    void getCurrentSession().then(setSession);
   }, []);
 
   const refreshUsers = async () => {
     await loadUsers();
   };
 
-  const handleToggleLock = async (user: AdminUser) => {
-    await updateAdminUserAccess(user.id, { isLocked: !user.isLocked });
-    await refreshUsers();
+  const handleToggleLock = async (user: AdminUser): Promise<{ message: string }> => {
+    setBusyUserId(user.id);
+
+    try {
+      const result = await updateAdminUserAccess(user.id, { isLocked: !user.isLocked });
+      await refreshUsers();
+      return result;
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
-  const handleToggleApproval = async (user: AdminUser) => {
-    await updateAdminUserAccess(user.id, { isApproved: !user.isApproved });
-    await refreshUsers();
+  const handleToggleApproval = async (user: AdminUser): Promise<{ message: string }> => {
+    setBusyUserId(user.id);
+
+    try {
+      const result = await updateAdminUserAccess(user.id, { isApproved: !user.isApproved });
+      await refreshUsers();
+      return result;
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
-  const handleUpdateUser = async (user: AdminUser, payload: { fullName: string; userName: string; email: string; role: 'Admin' | 'User' }) => {
-    await updateAdminUserAccess(user.id, payload);
-    await refreshUsers();
+  const handleUpdateUser = async (user: AdminUser, payload: { fullName: string; userName: string; email: string; role: 'Admin' | 'User' }): Promise<{ message: string }> => {
+    setBusyUserId(user.id);
+
+    try {
+      const result = await updateAdminUserAccess(user.id, payload);
+      await refreshUsers();
+      return result;
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
-  const handleDeleteUser = async (user: AdminUser) => {
-    await deleteAdminUser(user.id);
-    await refreshUsers();
+  const handleDeleteUser = async (user: AdminUser): Promise<{ message: string }> => {
+    setBusyUserId(user.id);
+
+    try {
+      const result = await deleteAdminUser(user.id);
+      await refreshUsers();
+      return result;
+    } finally {
+      setBusyUserId(null);
+    }
   };
 
   if (loading && users.length === 0) {
@@ -70,5 +101,5 @@ export function AdminUsersRoute() {
     );
   }
 
-  return <AdminUsersPage users={users} onUpdateUser={handleUpdateUser} onToggleLock={handleToggleLock} onToggleApproval={handleToggleApproval} onDeleteUser={handleDeleteUser} />;
+  return <AdminUsersPage session={session} users={users} busyUserId={busyUserId} onUpdateUser={handleUpdateUser} onToggleLock={handleToggleLock} onToggleApproval={handleToggleApproval} onDeleteUser={handleDeleteUser} />;
 }

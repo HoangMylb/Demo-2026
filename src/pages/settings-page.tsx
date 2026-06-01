@@ -46,11 +46,11 @@ export function SettingsPage({ session }: SettingsPageProps) {
     setError(null);
 
     try {
-      const response = await updateProfile({ fullName, userName, email });
-      setProfile(response);
-      setFullName(response.fullName);
-      setUserName(response.userName);
-      setEmail(response.email);
+      const result = await updateProfile({ fullName, userName, email });
+      setProfile(result.data);
+      setFullName(result.data.fullName);
+      setUserName(result.data.userName);
+      setEmail(result.data.email);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to update profile.');
     } finally {

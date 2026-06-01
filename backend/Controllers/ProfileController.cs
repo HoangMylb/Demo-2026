@@ -20,7 +20,7 @@ public class ProfileController(AppDbContext context) : ControllerBase
     var user = await FindCurrentUserAsync();
     if (user is null)
     {
-      return Unauthorized();
+      return this.ApiUnauthorized();
     }
 
     return this.ApiOk(MapProfile(user));
@@ -32,7 +32,7 @@ public class ProfileController(AppDbContext context) : ControllerBase
     var user = await FindCurrentUserAsync();
     if (user is null)
     {
-      return Unauthorized();
+      return this.ApiUnauthorized();
     }
 
     var normalizedEmail = request.Email.Trim().ToLowerInvariant();
@@ -41,13 +41,13 @@ public class ProfileController(AppDbContext context) : ControllerBase
     var emailTaken = await _context.Users.AnyAsync(item => item.Id != user.Id && item.Email.ToLower() == normalizedEmail);
     if (emailTaken)
     {
-      return Conflict(new { message = "This email is already in use." });
+      return this.ApiConflict("This email is already in use.");
     }
 
     var userNameTaken = await _context.Users.AnyAsync(item => item.Id != user.Id && item.UserName.ToLower() == normalizedUserName);
     if (userNameTaken)
     {
-      return Conflict(new { message = "This username is already in use." });
+      return this.ApiConflict("This username is already in use.");
     }
 
     user.FullName = request.FullName.Trim();

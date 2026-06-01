@@ -5,16 +5,23 @@ import { formatCurrency } from '../../utils/format';
 
 interface AdminProductsTableProps {
   products: AdminProduct[];
+  deletingProductId: number | null;
+  onCreate: () => void;
   onEdit: (product: AdminProduct) => void;
   onDelete: (productId: number) => Promise<void>;
 }
 
-export function AdminProductsTable({ products, onEdit, onDelete }: AdminProductsTableProps) {
+export function AdminProductsTable({ products, deletingProductId, onCreate, onEdit, onDelete }: AdminProductsTableProps) {
   return (
     <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Product management</p>
-        <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Inventory table</h3>
+      <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Product management</p>
+          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Inventory table</h3>
+        </div>
+        <Button type="button" variant="secondary" onClick={onCreate}>
+          Add product
+        </Button>
       </div>
 
       <div className="overflow-x-auto">
@@ -51,7 +58,7 @@ export function AdminProductsTable({ products, onEdit, onDelete }: AdminProducts
                     </Button>
                     <Button type="button" variant="ghost" className="rounded-2xl px-4 py-2" onClick={() => void onDelete(product.id)}>
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
+                      {deletingProductId === product.id ? 'Deleting...' : 'Delete'}
                     </Button>
                   </div>
                 </td>

@@ -8,6 +8,21 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiRequestError';
+  }
+}
+
+interface ApiResult<T> {
+  data: T;
+  message: string;
+}
+
 interface LoginResponse {
   email: string;
   userName: string;
@@ -103,38 +118,44 @@ async function getSessionResponse() {
   return mapSession(payload.data);
 }
 
-async function parseJsonResponse<T>(response: Response) {
+async function parseJsonResponse<T>(response: Response): Promise<ApiResult<T>> {
+  const payload = (await response.json()) as ApiEnvelope<T> | { message?: string };
+
   if (response.status === 401) {
-    throw new Error('401 Unauthorized - provide a valid JWT before accessing admin APIs.');
+    throw new ApiRequestError(payload.message ?? '401 Unauthorized - provide a valid JWT before accessing admin APIs.', 401);
   }
 
   if (response.status === 403) {
-    throw new Error('403 Forbidden - admin role required.');
+    throw new ApiRequestError(payload.message ?? '403 Forbidden - admin role required.', 403);
   }
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}.`);
+    throw new ApiRequestError(payload.message ?? `Request failed with status ${response.status}.`, response.status);
   }
 
-  const payload = (await response.json()) as ApiEnvelope<T>;
-  return payload.data;
+  const successPayload = payload as ApiEnvelope<T>;
+  return { data: successPayload.data, message: successPayload.message };
 }
 
-async function parseVoidResponse(response: Response) {
+async function parseVoidResponse(response: Response): Promise<{ message: string }> {
+  const payload = response.status === 204 ? null : ((await response.json()) as ApiEnvelope<null> | { message?: string });
+
   if (response.status === 401) {
-    throw new Error('401 Unauthorized - provide a valid JWT before accessing admin APIs.');
+    throw new ApiRequestError(payload?.message ?? '401 Unauthorized - provide a valid JWT before accessing admin APIs.', 401);
   }
 
   if (response.status === 403) {
-    throw new Error('403 Forbidden - admin role required.');
+    throw new ApiRequestError(payload?.message ?? '403 Forbidden - admin role required.', 403);
   }
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}.`);
+    throw new ApiRequestError(payload?.message ?? `Request failed with status ${response.status}.`, response.status);
   }
+
+  return { message: payload?.message ?? 'Request completed successfully' };
 }
 
-async function request<T>(path: string, init?: RequestInit) {
+async function request<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
   const headers = new Headers(init?.headers);
   headers.set('Content-Type', 'application/json');
 
@@ -147,7 +168,7 @@ async function request<T>(path: string, init?: RequestInit) {
   return parseJsonResponse<T>(response);
 }
 
-async function requestWithoutJson(path: string, init?: RequestInit) {
+async function requestWithoutJson(path: string, init?: RequestInit): Promise<{ message: string }> {
   const headers = new Headers(init?.headers);
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -160,42 +181,42 @@ async function requestWithoutJson(path: string, init?: RequestInit) {
 }
 
 export async function getAdminStats(): Promise<AdminStats> {
-  return request<AdminStats>('/api/admin/dashboard/stats');
+  return (await request<AdminStats>('/api/admin/dashboard/stats')).data;
 }
 
 export async function getAdminProducts(): Promise<AdminProduct[]> {
-  return request<AdminProduct[]>('/api/admin/products');
+  return (await request<AdminProduct[]>('/api/admin/products')).data;
 }
 
-export async function createAdminProduct(payload: ProductPayload): Promise<AdminProduct> {
+export async function createAdminProduct(payload: ProductPayload): Promise<ApiResult<AdminProduct>> {
   return request<AdminProduct>('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function updateAdminProduct(id: number, payload: ProductPayload): Promise<AdminProduct> {
+export async function updateAdminProduct(id: number, payload: ProductPayload): Promise<ApiResult<AdminProduct>> {
   return request<AdminProduct>(`/api/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
 }
 
-export async function deleteAdminProduct(id: number): Promise<void> {
-  await requestWithoutJson(`/api/admin/products/${id}`, { method: 'DELETE' });
+export async function deleteAdminProduct(id: number): Promise<{ message: string }> {
+  return requestWithoutJson(`/api/admin/products/${id}`, { method: 'DELETE' });
 }
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
-  return request<AdminUser[]>('/api/admin/users');
+  return (await request<AdminUser[]>('/api/admin/users')).data;
 }
 
-export async function updateAdminUserAccess(id: number, payload: UserAccessPayload): Promise<AdminUser> {
+export async function updateAdminUserAccess(id: number, payload: UserAccessPayload): Promise<ApiResult<AdminUser>> {
   return request<AdminUser>(`/api/admin/users/${id}/access`, { method: 'PATCH', body: JSON.stringify(payload) });
 }
 
-export async function deleteAdminUser(id: number): Promise<void> {
-  await requestWithoutJson(`/api/admin/users/${id}`, { method: 'DELETE' });
+export async function deleteAdminUser(id: number): Promise<{ message: string }> {
+  return requestWithoutJson(`/api/admin/users/${id}`, { method: 'DELETE' });
 }
 
 export async function getProfile(): Promise<Profile> {
-  return request<Profile>('/api/profile');
+  return (await request<Profile>('/api/profile')).data;
 }
 
-export async function updateProfile(payload: ProfileUpdatePayload): Promise<Profile> {
+export async function updateProfile(payload: ProfileUpdatePayload): Promise<ApiResult<Profile>> {
   return request<Profile>('/api/profile', { method: 'PUT', body: JSON.stringify(payload) });
 }
 

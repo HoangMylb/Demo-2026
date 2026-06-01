@@ -29,13 +29,13 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
     var emailExists = await _context.Users.AnyAsync(item => item.Email.ToLower() == normalizedEmail);
     if (emailExists)
     {
-      return Conflict(new { message = "This email is already registered." });
+      return this.ApiConflict("This email is already registered.");
     }
 
     var userNameExists = await _context.Users.AnyAsync(item => item.UserName.ToLower() == normalizedUserName);
     if (userNameExists)
     {
-      return Conflict(new { message = "A user with this username already exists." });
+      return this.ApiConflict("A user with this username already exists.");
     }
 
     var user = new Backend.Models.User
@@ -63,12 +63,12 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
     var user = await _context.Users.FirstOrDefaultAsync(item => item.Email.ToLower() == normalizedEmail);
     if (user is null || !PasswordHasher.VerifyPassword(request.Password, user.PasswordHash))
     {
-      return Unauthorized(new { message = "Invalid email or password." });
+      return this.ApiUnauthorized("Invalid email or password.");
     }
 
     if (user.IsLocked)
     {
-      return Forbid();
+      return this.ApiError(403, "This account is locked or forbidden.");
     }
 
     var token = CreateJwt(user);
@@ -88,7 +88,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
   {
     if (User.Identity?.IsAuthenticated != true)
     {
-      return Unauthorized();
+      return this.ApiUnauthorized();
     }
 
     var email = User.GetUserEmail();
@@ -97,7 +97,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
 
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(role))
     {
-      return Unauthorized();
+      return this.ApiUnauthorized();
     }
 
     return this.ApiOk(new SessionDto(email, userName, role));
@@ -108,7 +108,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
   public IActionResult Logout()
   {
     Response.Cookies.Delete(AuthCookieName, BuildCookieOptions(DateTimeOffset.UtcNow));
-    return NoContent();
+    return this.ApiOk<object?>(null, "Logged out successfully.");
   }
 
   private JwtSecurityToken CreateJwt(Backend.Models.User user)

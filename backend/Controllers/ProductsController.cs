@@ -55,6 +55,6 @@ public class ProductsController(AppDbContext context) : ControllerBase
       ))
       .FirstOrDefaultAsync();
 
-    return product is null ? NotFound() : this.ApiOk(product);
+    return product is null ? this.ApiNotFound("The requested product was not found.") : this.ApiOk(product);
   }
 }

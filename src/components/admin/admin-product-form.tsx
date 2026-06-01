@@ -8,9 +8,10 @@ interface AdminProductFormProps {
   categoryOptions: AdminCategoryOption[];
   onSubmit: (values: ProductPayload) => Promise<void>;
   onCancelEdit: () => void;
+  submitLabel?: string;
 }
 
-export function AdminProductForm({ editingProduct, categoryOptions, onSubmit, onCancelEdit }: AdminProductFormProps) {
+export function AdminProductForm({ editingProduct, categoryOptions, onSubmit, onCancelEdit, submitLabel }: AdminProductFormProps) {
   const {
     register,
     handleSubmit,
@@ -50,14 +51,6 @@ export function AdminProductForm({ editingProduct, categoryOptions, onSubmit, on
   }, [categoryOptions, editingProduct, reset]);
 
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-      <div className="mb-6">
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Product form</p>
-        <h3 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-          {editingProduct ? 'Edit product' : 'Add a new product'}
-        </h3>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 md:grid-cols-2">
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Product name</span>
@@ -121,16 +114,15 @@ export function AdminProductForm({ editingProduct, categoryOptions, onSubmit, on
 
         <div className="flex gap-3 md:col-span-2">
           <Button type="submit" variant="secondary" disabled={isSubmitting || categoryOptions.length === 0}>
-            {isSubmitting ? 'Saving...' : editingProduct ? 'Update product' : 'Create product'}
+            {isSubmitting ? 'Saving...' : submitLabel ?? (editingProduct ? 'Update product' : 'Create product')}
           </Button>
 
-          {editingProduct ? (
+          {editingProduct || submitLabel ? (
             <Button type="button" variant="ghost" onClick={onCancelEdit}>
-              Cancel edit
+              Cancel
             </Button>
           ) : null}
         </div>
       </form>
-    </section>
   );
 }
