@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { MiniCart } from './components/cart/mini-cart';
+import { AppErrorBoundary } from './components/feedback/app-error-boundary';
 import { Toast } from './components/feedback/toast';
 import { Navbar } from './components/layout/navbar';
 import { AdminRouteShell } from './components/admin/admin-route-shell';
@@ -12,9 +13,11 @@ import { AdminProductsRoute } from './pages/admin-products-route';
 import { AdminUsersRoute } from './pages/admin-users-route';
 import { AuthPage } from './pages/auth-page';
 import { HomePage } from './pages/home-page';
+import { NotFoundPage } from './pages/not-found-page';
 import { ProductDetailPage } from './pages/product-detail-page';
 import { ProductsPage } from './pages/products-page';
 import { SettingsPage } from './pages/settings-page';
+import { UnauthorizedPage } from './pages/unauthorized-page';
 import { useCartStore } from './stores/cart-store';
 import type { AdminSession } from './types/admin';
 import type { ProductType } from './types/product';
@@ -188,6 +191,22 @@ function SettingsRoute({ session, onLogout }: { session: AdminSession | null; on
   );
 }
 
+function NotFoundRoute({ session, onLogout }: { session: AdminSession | null; onLogout: () => void }) {
+  return (
+    <StoreShell session={session} onLogout={onLogout}>
+      <NotFoundPage />
+    </StoreShell>
+  );
+}
+
+function UnauthorizedRoute({ session, onLogout }: { session: AdminSession | null; onLogout: () => void }) {
+  return (
+    <StoreShell session={session} onLogout={onLogout}>
+      <UnauthorizedPage />
+    </StoreShell>
+  );
+}
+
 function App() {
   useThemeEffect();
 
@@ -231,49 +250,52 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <StoreShell session={session} onLogout={handleLogout}>
-              <HomeRoute onAddToCart={handleAddToCart} />
-            </StoreShell>
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <StoreShell session={session} onLogout={handleLogout}>
-              <ProductsRoute onAddToCart={handleAddToCart} />
-            </StoreShell>
-          }
-        />
-        <Route
-          path="/products/:productId"
-          element={
-            <StoreShell session={session} onLogout={handleLogout}>
-              <ProductDetailRoute onAddToCart={handleAddToCart} />
-            </StoreShell>
-          }
-        />
-        <Route
-          path="/auth"
-          element={<AuthRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />}
-        />
-        <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
-        <Route path="/admin/login" element={<AdminLoginRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />} />
-        <Route path="/admin" element={<AdminRouteShell />}>
-          <Route index element={<AdminDashboardRoute />} />
-          <Route path="products" element={<AdminProductsRoute />} />
-          <Route path="users" element={<AdminUsersRoute />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+    <AppErrorBoundary>
+      <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <StoreShell session={session} onLogout={handleLogout}>
+                <HomeRoute onAddToCart={handleAddToCart} />
+              </StoreShell>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <StoreShell session={session} onLogout={handleLogout}>
+                <ProductsRoute onAddToCart={handleAddToCart} />
+              </StoreShell>
+            }
+          />
+          <Route
+            path="/products/:productId"
+            element={
+              <StoreShell session={session} onLogout={handleLogout}>
+                <ProductDetailRoute onAddToCart={handleAddToCart} />
+              </StoreShell>
+            }
+          />
+          <Route
+            path="/auth"
+            element={<AuthRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />}
+          />
+          <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
+          <Route path="/unauthorized" element={<UnauthorizedRoute session={session} onLogout={handleLogout} />} />
+          <Route path="/admin/login" element={<AdminLoginRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />} />
+          <Route path="/admin" element={<AdminRouteShell />}> 
+            <Route index element={<AdminDashboardRoute />} />
+            <Route path="products" element={<AdminProductsRoute />} />
+            <Route path="users" element={<AdminUsersRoute />} />
+          </Route>
+          <Route path="*" element={<NotFoundRoute session={session} onLogout={handleLogout} />} />
+        </Routes>
 
-      <MiniCart visible={Boolean(session?.isAuthenticated)} />
-      <Toast visible={toastVisible} message={`${lastAddedProductName} was added to your cart.`} />
-    </div>
+        <MiniCart visible={Boolean(session?.isAuthenticated)} />
+        <Toast visible={toastVisible} message={`${lastAddedProductName} was added to your cart.`} />
+      </div>
+    </AppErrorBoundary>
   );
 }
 

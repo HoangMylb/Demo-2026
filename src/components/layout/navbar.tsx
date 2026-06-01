@@ -49,6 +49,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
     : [
         { label: 'Login', action: () => onNavigate('/auth?mode=login') },
         { label: 'Register', action: () => onNavigate('/auth?mode=register') },
+        { label: 'Admin login', action: () => onNavigate('/admin/login') },
       ];
 
   return (

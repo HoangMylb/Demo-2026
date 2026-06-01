@@ -5,7 +5,7 @@ namespace Backend.Extensions;
 
 public static class ControllerBaseExtensions
 {
-  public static OkObjectResult ApiOk<T>(this ControllerBase controller, T data, string message = "Submit thành công") =>
+  public static OkObjectResult ApiOk<T>(this ControllerBase controller, T data, string message = "Request completed successfully") =>
     controller.Ok(new ApiResponseDto<T>(0, message, data));
 
   public static CreatedAtActionResult ApiCreatedAtAction<T>(
@@ -13,6 +13,6 @@ public static class ControllerBaseExtensions
     string actionName,
     object? routeValues,
     T data,
-    string message = "Submit thành công") =>
+    string message = "Request completed successfully") =>
     controller.CreatedAtAction(actionName, routeValues, new ApiResponseDto<T>(0, message, data));
 }
