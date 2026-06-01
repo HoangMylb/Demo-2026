@@ -52,8 +52,6 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy.WithOrigins(
-                    "http://localhost:5000",
-                    "http://localhost:5173",
                     "https://hoangmydemo.online",
                     "https://www.hoangmydemo.online",
                     "https://demo-2026-rho.vercel.app" // Thêm cả cái này vào cho chắc cốp
