@@ -8,6 +8,7 @@ interface ApiEnvelope<T> {
   data: T;
 }
 
+
 export class ApiRequestError extends Error {
   constructor(
     message: string,
