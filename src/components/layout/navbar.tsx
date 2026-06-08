@@ -1,6 +1,7 @@
 import { MenuOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 import { useMemo, useState } from 'react';
+import type { MenuProps } from 'antd';
 import { ThemeToggle } from './theme-toggle';
 import { useCartStore } from '../../stores/cart-store';
 import type { AdminSession } from '../../types/admin';
@@ -30,7 +31,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
     [isAdmin],
   );
 
-  const accountMenuItems = isLoggedIn
+  const accountMenuItems: MenuProps['items'] = isLoggedIn
     ? [
         { key: 'settings', label: 'Settings', onClick: () => onNavigate('/settings') },
         { key: 'logout', label: 'Logout', onClick: onLogout },
@@ -40,6 +41,8 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
         { key: 'register', label: 'Register', onClick: () => onNavigate('/auth?mode=register') },
         { key: 'admin-login', label: 'Admin login', onClick: () => onNavigate('/admin/login') },
       ];
+
+  const popupClassName = 'site-account-dropdown';
 
   return (
     <Header
@@ -89,7 +92,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
             <ThemeToggle />
           </div>
 
-          <Dropdown menu={{ items: accountMenuItems }} trigger={['click']}>
+          <Dropdown menu={{ items: accountMenuItems }} trigger={['click']} overlayClassName={popupClassName}>
             <Button type="text" icon={<Avatar size="small" icon={<UserOutlined />} style={{ background: 'var(--color-bg-surface-soft)', color: 'var(--color-text-primary)' }} />} />
           </Dropdown>
 

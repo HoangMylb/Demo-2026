@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRightOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Form, Input, Space, Typography } from 'antd';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { clearAdminSession, loginAdmin, registerAdmin } from '../../lib/admin-api';
 
@@ -63,7 +63,7 @@ function AuthFormFrame({
 function LoginForm({ audience, onSuccess }: BaseFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
@@ -105,13 +105,37 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <div>
             <Typography.Text strong>Email</Typography.Text>
-            <Input prefix={<MailOutlined />} placeholder="hello@lumastore.com" size="large" {...register('email')} status={errors.email ? 'error' : ''} />
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  prefix={<MailOutlined />}
+                  placeholder="hello@lumastore.com"
+                  size="large"
+                  status={errors.email ? 'error' : ''}
+                />
+              )}
+            />
             {errors.email ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.email.message}</Typography.Paragraph> : null}
           </div>
 
           <div>
             <Typography.Text strong>Password</Typography.Text>
-            <Input.Password prefix={<LockOutlined />} placeholder="Enter your password" size="large" {...register('password')} status={errors.password ? 'error' : ''} />
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <Input.Password
+                  {...field}
+                  prefix={<LockOutlined />}
+                  placeholder="Enter your password"
+                  size="large"
+                  status={errors.password ? 'error' : ''}
+                />
+              )}
+            />
             {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
 
@@ -129,7 +153,7 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
 function RegisterForm({ onSuccess }: BaseFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
@@ -162,19 +186,55 @@ function RegisterForm({ onSuccess }: BaseFormProps) {
         <Space direction="vertical" size={16} style={{ width: '100%' }}>
           <div>
             <Typography.Text strong>Full name</Typography.Text>
-            <Input prefix={<UserOutlined />} placeholder="Avery Morgan" size="large" {...register('name')} status={errors.name ? 'error' : ''} />
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  prefix={<UserOutlined />}
+                  placeholder="Avery Morgan"
+                  size="large"
+                  status={errors.name ? 'error' : ''}
+                />
+              )}
+            />
             {errors.name ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.name.message}</Typography.Paragraph> : null}
           </div>
 
           <div>
             <Typography.Text strong>Email</Typography.Text>
-            <Input prefix={<MailOutlined />} placeholder="hello@lumastore.com" size="large" {...register('email')} status={errors.email ? 'error' : ''} />
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  prefix={<MailOutlined />}
+                  placeholder="hello@lumastore.com"
+                  size="large"
+                  status={errors.email ? 'error' : ''}
+                />
+              )}
+            />
             {errors.email ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.email.message}</Typography.Paragraph> : null}
           </div>
 
           <div>
             <Typography.Text strong>Password</Typography.Text>
-            <Input.Password prefix={<LockOutlined />} placeholder="Create a password" size="large" {...register('password')} status={errors.password ? 'error' : ''} />
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <Input.Password
+                  {...field}
+                  prefix={<LockOutlined />}
+                  placeholder="Create a password"
+                  size="large"
+                  status={errors.password ? 'error' : ''}
+                />
+              )}
+            />
             {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
 
