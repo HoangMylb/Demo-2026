@@ -1,7 +1,8 @@
-import { BarChart3, LayoutDashboard, Package, ShieldCheck, UserRound, Users } from 'lucide-react';
-import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
-import { ThemeToggle } from '../layout/theme-toggle';
-import { cn } from '../../utils/styles';
+import { AppstoreOutlined, BarChartOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { Avatar, Button, Dropdown, Grid, Layout, Menu, Space, Tag, theme, Typography } from 'antd';
+import { useMemo, type PropsWithChildren } from 'react';
+
+const { Header, Content, Sider } = Layout;
 
 export type AdminView = 'dashboard' | 'products' | 'users';
 
@@ -14,140 +15,150 @@ interface AdminLayoutProps extends PropsWithChildren {
   sessionEmail: string | null;
 }
 
-const navigationItems: Array<{ key: AdminView; label: string; icon: typeof LayoutDashboard }> = [
-  { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { key: 'products', label: 'Products', icon: Package },
-  { key: 'users', label: 'Users', icon: Users },
-];
-
 export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, sessionRole, sessionEmail, children }: AdminLayoutProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const { token } = theme.useToken();
+  const screens = Grid.useBreakpoint();
+  const isDesktop = Boolean(screens.lg);
 
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-
-    window.addEventListener('mousedown', handlePointerDown);
-    return () => window.removeEventListener('mousedown', handlePointerDown);
-  }, []);
+  const menuItems = useMemo(
+    () => [
+      { key: 'dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
+      { key: 'products', icon: <ShopOutlined />, label: 'Products' },
+      { key: 'users', icon: <TeamOutlined />, label: 'Users' },
+    ],
+    [],
+  );
 
   return (
-    <section className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-      <aside className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.32em] text-accent-600">Admin panel</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Operations workspace</h2>
-          </div>
-          <BarChart3 className="h-6 w-6 text-accent-600" />
-        </div>
-
-        <div className="mt-6 rounded-2xl border border-accent-100 bg-accent-50/80 p-4 text-sm text-accent-700 dark:border-accent-500/20 dark:bg-accent-500/10 dark:text-accent-100">
-          <div className="flex items-center gap-2 font-semibold">
-            <ShieldCheck className="h-4 w-4" />
-            Admin-only APIs
-          </div>
-          <p className="mt-2 leading-6">These screens assume backend endpoints are protected with role-based authorization and return 403 for non-admin users.</p>
-        </div>
-
-        <nav className="mt-6 space-y-2">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.key;
-
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => onNavigate(item.key)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition',
-                  isActive
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <button
-          type="button"
-          onClick={onExit}
-          className="mt-8 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+    <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
+      <Sider
+        breakpoint="lg"
+        collapsedWidth={isDesktop ? 80 : 0}
+        width={260}
+        style={{ background: 'transparent' }}
+      >
+        <div
+            style={{
+              position: 'sticky',
+              top: 24,
+              marginRight: 24,
+              borderRadius: token.borderRadiusLG,
+              background: 'var(--color-bg-surface)',
+              border: `1px solid var(--color-border-soft)`,
+              padding: 20,
+              boxShadow: token.boxShadowTertiary,
+            }}
         >
-          Back to storefront
-        </button>
-      </aside>
+          <Space direction="vertical" size={4} style={{ marginBottom: 20 }}>
+            <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: 12 }}>
+              Admin panel
+            </Typography.Text>
+            <Typography.Title level={4} style={{ margin: 0 }}>
+              Operations workspace
+            </Typography.Title>
+            <Typography.Paragraph type="secondary" style={{ margin: 0, fontSize: 13 }}>
+              A clean enterprise-style workspace that communicates maintainability and delivery speed.
+            </Typography.Paragraph>
+          </Space>
 
-      <div className="space-y-6">
-        <header className="flex flex-col gap-4 rounded-[2rem] border border-slate-200 bg-white px-6 py-5 shadow-soft dark:border-slate-800 dark:bg-slate-900 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Control center</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Admin Panel & Backend Integration</h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <div ref={menuRef} className="relative">
-              <button
-                type="button"
-                onClick={() => setMenuOpen((value) => !value)}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:scale-[1.03] hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                aria-label="Open admin account menu"
-                aria-expanded={menuOpen}
-              >
-                <UserRound className="h-5 w-5" />
-              </button>
-
-              {menuOpen ? (
-                <div className="absolute right-0 top-14 w-56 rounded-3xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-                  <div className="border-b border-slate-100 px-3 pb-3 pt-2 dark:border-slate-800">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Admin account</p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {sessionEmail ?? 'No email is currently available.'}
-                    </p>
-                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.24em] text-accent-600">
-                      {sessionRole ?? 'Unknown role'}
-                    </p>
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        onOpenSettings();
-                      }}
-                      className="flex w-full rounded-2xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      Setting
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        onExit();
-                      }}
-                      className="flex w-full rounded-2xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
-              ) : null}
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              alignItems: 'flex-start',
+              marginBottom: 20,
+              padding: 16,
+              borderRadius: token.borderRadiusLG,
+              background: 'var(--color-brand-50)',
+            }}
+          >
+            <BarChartOutlined style={{ color: 'var(--color-brand-600)', fontSize: 18, marginTop: 2 }} />
+            <div>
+              <Typography.Text strong>Admin APIs</Typography.Text>
+              <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0', fontSize: 13 }}>
+                Standardized CRUD screens built for fast delivery and easier client handoff.
+              </Typography.Paragraph>
             </div>
           </div>
-        </header>
 
-        {children}
-      </div>
-    </section>
+          <Menu
+            mode="inline"
+            selectedKeys={[activeView]}
+            items={menuItems}
+            onClick={(event) => onNavigate(event.key as AdminView)}
+            style={{ borderInlineEnd: 'none' }}
+          />
+
+          <Button block style={{ marginTop: 20 }} onClick={onExit}>
+            Back to storefront
+          </Button>
+        </div>
+      </Sider>
+
+      <Layout style={{ background: 'transparent' }}>
+        <Header
+          style={{
+            background: 'transparent',
+            padding: '24px 0 0',
+            height: 'auto',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              padding: isDesktop ? '20px 24px' : '16px',
+              borderRadius: token.borderRadiusLG,
+              background: 'var(--color-bg-surface)',
+              border: `1px solid var(--color-border-soft)`,
+              boxShadow: token.boxShadowTertiary,
+            }}
+          >
+            <div>
+              <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.18em', fontSize: 12 }}>
+                Control center
+              </Typography.Text>
+              <Typography.Title level={isDesktop ? 2 : 3} style={{ margin: '6px 0 0' }}>
+                Admin Panel
+              </Typography.Title>
+              <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0' }}>
+                Standardized admin flows using familiar UI patterns for faster delivery and easier client handoff.
+              </Typography.Paragraph>
+            </div>
+
+            <Dropdown
+              menu={{
+                items: [
+                  { key: 'email', label: sessionEmail ?? 'No email available', disabled: true },
+                  { key: 'role', label: sessionRole ?? 'Unknown role', disabled: true },
+                  { type: 'divider' },
+                  { key: 'settings', icon: <SettingOutlined />, label: 'Settings', onClick: onOpenSettings },
+                  { key: 'logout', label: 'Logout', onClick: onExit },
+                ],
+              }}
+              trigger={['click']}
+            >
+              <Button type="text" style={{ height: 'auto', padding: 0 }}>
+                <Space>
+                  <Avatar icon={<UserOutlined />} />
+                  {isDesktop ? (
+                    <Space direction="vertical" size={0}>
+                      <Typography.Text strong>Admin workspace</Typography.Text>
+                      <Tag color="blue" style={{ marginInlineEnd: 0, width: 'fit-content' }}>
+                        {sessionRole ?? 'Unknown role'}
+                      </Tag>
+                    </Space>
+                  ) : null}
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
+        </Header>
+
+        <Content style={{ padding: '24px 0' }}>{children}</Content>
+      </Layout>
+    </Layout>
   );
 }

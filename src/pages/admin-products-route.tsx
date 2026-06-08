@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AdminStateCard } from '../components/admin/admin-state-card';
-import { Button } from '../components/ui/button';
+import { Button, Result, Spin } from 'antd';
 import { createAdminProduct, deleteAdminProduct, getAdminProducts, updateAdminProduct } from '../lib/admin-api';
 import { AdminProductsPage } from './admin-products-page';
 import type { AdminCategoryOption, AdminProduct, ProductPayload } from '../types/admin';
@@ -81,16 +80,17 @@ export function AdminProductsRoute() {
   };
 
   if (loading && products.length === 0) {
-    return <AdminStateCard title="Loading products" description="Fetching inventory data for the product management workspace." />;
+    return <Spin size="large" fullscreen tip="Fetching inventory data for the product management workspace." />;
   }
 
   if (error && products.length === 0) {
     return (
-      <AdminStateCard
+      <Result
+        status="error"
         title="Unable to load products"
-        description={error}
-        action={
-          <Button type="button" variant="secondary" onClick={() => void loadProducts()}>
+        subTitle={error}
+        extra={
+          <Button type="primary" onClick={() => void loadProducts()}>
             Retry product load
           </Button>
         }

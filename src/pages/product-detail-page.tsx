@@ -1,8 +1,8 @@
+import { Button } from 'antd';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Sparkles, Star } from 'lucide-react';
 import type { ProductType } from '../types/product';
 import { formatCurrency } from '../utils/format';
-import { Button } from '../components/ui/button';
 
 interface ProductDetailPageProps {
   product: ProductType | null;
@@ -12,9 +12,16 @@ interface ProductDetailPageProps {
 export function ProductDetailPage({ product, onAddToCart }: ProductDetailPageProps) {
   if (!product) {
     return (
-      <section className="rounded-[2rem] border border-dashed border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="text-2xl font-semibold text-slate-950 dark:text-white">Product not found</h2>
-        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">The requested product could not be loaded from the storefront API.</p>
+      <section
+        className="rounded-[2rem] border border-dashed p-10 text-center"
+        style={{ borderColor: 'var(--color-border-soft)', background: 'var(--color-bg-surface)' }}
+      >
+        <h2 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+          Product not found
+        </h2>
+        <p className="mt-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          The requested product could not be loaded from the storefront API.
+        </p>
       </section>
     );
   }
@@ -24,7 +31,8 @@ export function ProductDetailPage({ product, onAddToCart }: ProductDetailPagePro
       <motion.div
         initial={{ opacity: 0, x: -24 }}
         animate={{ opacity: 1, x: 0 }}
-        className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900"
+        className="overflow-hidden rounded-[2rem] border shadow-soft"
+        style={{ borderColor: 'var(--color-border-soft)', background: 'var(--color-bg-surface)' }}
       >
         <img src={product.image} alt={product.name} className="h-full min-h-[420px] w-full object-cover" />
       </motion.div>
@@ -33,28 +41,37 @@ export function ProductDetailPage({ product, onAddToCart }: ProductDetailPagePro
         <div className={`inline-flex rounded-full bg-gradient-to-r ${product.accent} px-4 py-2 text-sm font-semibold text-white`}>
           {product.category}
         </div>
-        <h2 className="mt-6 text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">{product.name}</h2>
+        <h2 className="mt-6 text-4xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+          {product.name}
+        </h2>
 
-        <div className="mt-4 flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+        <div className="mt-4 flex items-center gap-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="inline-flex items-center gap-1 rounded-full px-3 py-1" style={{ background: 'var(--color-bg-surface-soft)' }}>
             <Star className="h-4 w-4 fill-current text-amber-400" />
             {product.rating} / 5 rating
           </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800">
+          <span className="inline-flex items-center gap-1 rounded-full px-3 py-1" style={{ background: 'var(--color-bg-surface-soft)' }}>
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
             2-year support
           </span>
         </div>
 
-        <p className="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">{product.description}</p>
+        <p className="mt-6 text-lg leading-8" style={{ color: 'var(--color-text-secondary)' }}>
+          {product.description}
+        </p>
 
-        <div className="mt-8 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/70">
+        <div
+          className="mt-8 rounded-[1.75rem] border p-6"
+          style={{ borderColor: 'var(--color-border-soft)', background: 'var(--color-bg-surface-soft)' }}
+        >
           <div className="flex items-center justify-between gap-6">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Price</p>
-              <p className="mt-2 text-4xl font-semibold text-slate-950 dark:text-white">{formatCurrency(product.price)}</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Price</p>
+              <p className="mt-2 text-4xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                {formatCurrency(product.price)}
+              </p>
             </div>
-            <Button variant="secondary" className="px-7" onClick={() => onAddToCart(product)}>
+            <Button type="primary" size="large" onClick={() => onAddToCart(product)}>
               <Sparkles className="mr-2 h-4 w-4" />
               Add to cart
             </Button>
@@ -67,9 +84,13 @@ export function ProductDetailPage({ product, onAddToCart }: ProductDetailPagePro
             ['Returns', '30-day easy returns'],
             ['Support', 'Live chat included'],
           ].map(([title, text]) => (
-            <div key={title} className="rounded-[1.5rem] border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="font-semibold text-slate-950 dark:text-white">{title}</h3>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{text}</p>
+            <div
+              key={title}
+              className="rounded-[1.5rem] border p-4"
+              style={{ borderColor: 'var(--color-border-soft)', background: 'var(--color-bg-surface)' }}
+            >
+              <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{title}</h3>
+              <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>{text}</p>
             </div>
           ))}
         </div>

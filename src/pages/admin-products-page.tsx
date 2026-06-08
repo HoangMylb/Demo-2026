@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Button, Card, Divider, Form, Image, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Typography, Upload } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import type { ColumnsType } from 'antd/es/table';
 import type { AdminCategoryOption, AdminProduct, ProductPayload } from '../types/admin';
-import { AdminProductForm } from '../components/admin/admin-product-form';
-import { AdminProductsTable } from '../components/admin/admin-products-table';
-import { ConfirmDialog } from '../components/feedback/confirm-dialog';
-import { useNotification } from '../components/feedback/notification-provider';
-import { Modal } from '../components/ui/modal';
+import { formatCurrency } from '../utils/format';
 
 interface AdminProductsPageProps {
   products: AdminProduct[];
@@ -19,6 +18,26 @@ interface AdminProductsPageProps {
   onCancelEdit: () => void;
 }
 
+type ImageInputMode = 'url' | 'upload';
+
+async function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error('Unable to read the selected image file.'));
+    };
+
+    reader.onerror = () => reject(new Error('Unable to read the selected image file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AdminProductsPage({
   products,
   categoryOptions,
@@ -31,9 +50,12 @@ export function AdminProductsPage({
   onDeleteProduct,
   onCancelEdit,
 }: AdminProductsPageProps) {
-  const { notify } = useNotification();
-  const [pendingDeleteProductId, setPendingDeleteProductId] = useState<number | null>(null);
+  const { message } = App.useApp();
+  const [form] = Form.useForm<ProductPayload>();
+  const [submitting, setSubmitting] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [imageInputMode, setImageInputMode] = useState<ImageInputMode>('url');
+  const [selectedFileName, setSelectedFileName] = useState('');
 
   const filteredProducts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
@@ -51,61 +73,234 @@ export function AdminProductsPage({
     });
   }, [products, searchValue]);
 
+  useEffect(() => {
+    const initialCategoryId = categoryOptions[0]?.id ?? editingProduct?.categoryId ?? 0;
+    const initialImageUrl = editingProduct?.imageUrl ?? '';
+
+    form.setFieldsValue({
+      name: editingProduct?.name ?? '',
+      description: editingProduct?.description ?? '',
+      price: editingProduct?.price ?? 0,
+      imageUrl: initialImageUrl,
+      categoryId: editingProduct?.categoryId ?? initialCategoryId,
+    });
+
+    setImageInputMode(initialImageUrl.startsWith('data:image/') ? 'upload' : 'url');
+    setSelectedFileName('');
+  }, [categoryOptions, editingProduct, form, isCreateOpen]);
+
+  const imageUrlValue = Form.useWatch('imageUrl', form) ?? '';
+
+  const handleFileChange = async (file: File) => {
+    const dataUrl = await readFileAsDataUrl(file);
+    form.setFieldValue('imageUrl', dataUrl);
+    setSelectedFileName(file.name);
+  };
+
+  const columns: ColumnsType<AdminProduct> = [
+    {
+      title: 'Product',
+      key: 'product',
+      render: (_, product) => (
+        <Space align="start" size="middle">
+          <Image src={product.imageUrl} alt={product.name} width={56} height={56} style={{ borderRadius: 12, objectFit: 'cover' }} />
+          <Space direction="vertical" size={2}>
+            <Typography.Text strong>{product.name}</Typography.Text>
+            <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }} ellipsis={{ rows: 2 }}>
+              {product.description}
+            </Typography.Paragraph>
+          </Space>
+        </Space>
+      ),
+    },
+    {
+      title: 'Category',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
+      render: (value: string) => <Tag color="blue">{value}</Tag>,
+    },
+    {
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      render: (value: number) => formatCurrency(value),
+    },
+    {
+      title: 'Updated',
+      dataIndex: 'updatedAtUtc',
+      key: 'updatedAtUtc',
+      render: (value: string) => new Date(value).toLocaleDateString(),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, product) => (
+        <Space wrap>
+          <Button icon={<EditOutlined />} onClick={() => onEditProduct(product)}>
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete product"
+            description="Remove this product from the inventory and storefront listing."
+            okText="Delete"
+            cancelText="Cancel"
+            onConfirm={async () => {
+              try {
+                const result = await onDeleteProduct(product.id);
+                message.success(result.message);
+              } catch (error) {
+                message.error(error instanceof Error ? error.message : 'Unable to delete the product right now.');
+              }
+            }}
+          >
+            <Button danger icon={<DeleteOutlined />} loading={deletingProductId === product.id}>
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <>
-      <AdminProductsTable
-        products={filteredProducts}
-        searchValue={searchValue}
-        deletingProductId={deletingProductId}
-        onCreate={onOpenCreate}
-        onEdit={onEditProduct}
-        onDelete={async (productId) => setPendingDeleteProductId(productId)}
-        onSearchChange={setSearchValue}
-      />
+      <Space direction="vertical" size={20} style={{ width: '100%' }}>
+        <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+          <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title level={3} style={{ margin: 0 }}>
+                Product management
+              </Typography.Title>
+              <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
+                Standard inventory workflows with a cleaner handoff story for client teams.
+              </Typography.Paragraph>
+            </div>
+
+            <Button type="primary" icon={<PlusOutlined />} onClick={onOpenCreate}>
+              Add product
+            </Button>
+          </Space>
+
+          <Divider style={{ margin: '16px 0' }} />
+
+          <Input.Search
+            allowClear
+            placeholder="Filter by product name, description, or category"
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+          />
+        </Card>
+
+        <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+          <Table<AdminProduct>
+            rowKey="id"
+            columns={columns}
+            dataSource={filteredProducts}
+            pagination={{ pageSize: 6, showSizeChanger: false }}
+            scroll={{ x: 960 }}
+          />
+        </Card>
+      </Space>
 
       <Modal
         open={isCreateOpen || Boolean(editingProduct)}
         title={editingProduct ? 'Edit product' : 'Add a new product'}
-        description="Manage inventory with a focused popup flow so the table remains stable in the background."
-        onClose={onCancelEdit}
+        styles={{ body: { paddingTop: 12 } }}
+        onCancel={onCancelEdit}
+        onOk={() => void form.submit()}
+        okText={editingProduct ? 'Update product' : 'Create product'}
+        confirmLoading={submitting}
+        destroyOnClose
+        width={720}
       >
-        <AdminProductForm
-          editingProduct={editingProduct}
-          categoryOptions={categoryOptions}
-          onSubmit={async (values) => {
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={async (values) => {
+            setSubmitting(true);
+
             try {
               const result = await onSubmitProduct(values);
-              notify(result.message);
+              message.success(result.message);
             } catch (error) {
-              notify(error instanceof Error ? error.message : 'Unable to save the product right now.', 'error');
-              throw error;
+              message.error(error instanceof Error ? error.message : 'Unable to save the product right now.');
+            } finally {
+              setSubmitting(false);
             }
           }}
-          onCancelEdit={onCancelEdit}
-          submitLabel={editingProduct ? 'Update product' : 'Create product'}
-        />
-      </Modal>
+        >
+          <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
+            Use a structured product form instead of custom modal logic so the flow remains easy to extend and hand off.
+          </Typography.Paragraph>
 
-      <ConfirmDialog
-        open={pendingDeleteProductId !== null}
-        title="Delete product"
-        description="Remove this product from the inventory and storefront listing."
-        confirmLabel="Delete product"
-        busy={deletingProductId === pendingDeleteProductId && pendingDeleteProductId !== null}
-        onConfirm={() => {
-          if (pendingDeleteProductId !== null) {
-            void onDeleteProduct(pendingDeleteProductId)
-              .then((result) => {
-                setPendingDeleteProductId(null);
-                notify(result.message);
-              })
-              .catch((error) => {
-                notify(error instanceof Error ? error.message : 'Unable to delete the product right now.', 'error');
-              });
-          }
-        }}
-        onCancel={() => setPendingDeleteProductId(null)}
-      />
+          <Form.Item name="name" label="Product name" rules={[{ required: true, message: 'Please enter the product name.' }]}>
+            <Input placeholder="Luma Air Headphones" />
+          </Form.Item>
+
+          <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: 'Please select a category.' }]}>
+            <Select
+              options={categoryOptions.map((category) => ({ value: category.id, label: category.name }))}
+              placeholder="Select category"
+            />
+          </Form.Item>
+
+          <Form.Item name="description" label="Description" rules={[{ required: true, message: 'Please enter the description.' }]}>
+            <Input.TextArea rows={4} placeholder="Adaptive noise canceling headphones with spatial audio tuning." />
+          </Form.Item>
+
+          <Form.Item name="price" label="Price" rules={[{ required: true, message: 'Please enter the product price.' }]}>
+            <InputNumber min={0} style={{ width: '100%' }} placeholder="249" />
+          </Form.Item>
+
+          <Form.Item label="Image source">
+            <Select<ImageInputMode>
+              value={imageInputMode}
+              options={[
+                { value: 'url', label: 'Image URL' },
+                { value: 'upload', label: 'Upload from device' },
+              ]}
+              onChange={(value) => {
+                setImageInputMode(value);
+                if (value === 'url' && imageUrlValue.startsWith('data:image/')) {
+                  form.setFieldValue('imageUrl', '');
+                  setSelectedFileName('');
+                }
+              }}
+            />
+          </Form.Item>
+
+          {imageInputMode === 'url' ? (
+            <Form.Item name="imageUrl" label="Image URL" rules={[{ required: true, message: 'Please enter the image URL.' }]}>
+              <Input placeholder="https://images.unsplash.com/..." />
+            </Form.Item>
+          ) : (
+            <Form.Item label="Upload image" required>
+              <Upload
+                beforeUpload={(file) => {
+                  void handleFileChange(file).catch((error) => {
+                    message.error(error instanceof Error ? error.message : 'Unable to read the selected image file.');
+                  });
+                  return false;
+                }}
+                maxCount={1}
+                accept="image/*"
+                showUploadList={false}
+              >
+                <Button>Choose image file</Button>
+              </Upload>
+              <Typography.Paragraph type="secondary" style={{ marginTop: 8, marginBottom: 0 }}>
+                {selectedFileName ? `Selected file: ${selectedFileName}` : 'The image will be converted into a stored image URL payload.'}
+              </Typography.Paragraph>
+            </Form.Item>
+          )}
+
+          {imageUrlValue ? (
+            <Form.Item label="Preview">
+              <Image src={imageUrlValue} alt="Product preview" width="100%" style={{ borderRadius: 12 }} />
+            </Form.Item>
+          ) : null}
+        </Form>
+      </Modal>
     </>
   );
 }

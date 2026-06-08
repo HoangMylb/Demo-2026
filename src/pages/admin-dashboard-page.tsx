@@ -1,7 +1,7 @@
-import { Package, Users } from 'lucide-react';
+import { BarChartOutlined, ShoppingOutlined, TeamOutlined } from '@ant-design/icons';
+import { Card, Col, Empty, Row, Space, Statistic, Tag, Typography } from 'antd';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { AdminProduct, AdminStats } from '../types/admin';
-import { AdminStatCard } from '../components/admin/admin-stat-card';
 
 interface AdminDashboardPageProps {
   stats: AdminStats | null;
@@ -26,50 +26,67 @@ export function AdminDashboardPage({ stats, products, loading, error }: AdminDas
   );
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        <AdminStatCard
-          label="Total users"
-          value={stats?.totalUsers ?? 0}
-          description="Pulled from the admin stats endpoint using a direct count query on the Users table."
-          icon={<Users className="h-5 w-5" />}
-        />
-        <AdminStatCard
-          label="Total products"
-          value={stats?.totalProducts ?? 0}
-          description="Pulled from the admin stats endpoint using a direct count query on the Products table."
-          icon={<Package className="h-5 w-5" />}
-        />
+    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+      <div>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          Dashboard overview
+        </Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
+          High-signal metrics and product distribution in a layout clients and internal teams can scan quickly.
+        </Typography.Paragraph>
       </div>
 
-      <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-6 flex flex-col gap-2">
-          <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Weekly activity</p>
-          <h3 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">Category distribution from live products</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">This chart is derived from the current product list returned by the backend, so the dashboard changes with real inventory data.</p>
-        </div>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} md={12}>
+          <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+            <Statistic title="Total users" value={stats?.totalUsers ?? 0} prefix={<TeamOutlined />} loading={loading && !stats} />
+            <Typography.Paragraph type="secondary" style={{ marginTop: 12, marginBottom: 0 }}>
+              Live count pulled from the admin statistics endpoint.
+            </Typography.Paragraph>
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+            <Statistic title="Total products" value={stats?.totalProducts ?? 0} prefix={<ShoppingOutlined />} loading={loading && !stats} />
+            <Typography.Paragraph type="secondary" style={{ marginTop: 12, marginBottom: 0 }}>
+              Current product inventory returned by the backend.
+            </Typography.Paragraph>
+          </Card>
+        </Col>
+      </Row>
 
-        <div className="h-80">
+      <Card
+        title="Category distribution"
+        extra={<Tag color="blue">Live product data</Tag>}
+        bordered={false}
+        style={{ boxShadow: 'var(--shadow-soft)' }}
+      >
+        <Typography.Paragraph type="secondary">
+          This chart shows how the current inventory is distributed across categories.
+        </Typography.Paragraph>
+
+        <div style={{ height: 320 }}>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" stroke="#cbd5e1" vertical={false} />
-                <XAxis dataKey="name" stroke="#64748b" />
-                <YAxis stroke="#64748b" allowDecimals={false} />
+                <CartesianGrid strokeDasharray="4 4" stroke="#d9d9d9" vertical={false} />
+                <XAxis dataKey="name" stroke="#8c8c8c" />
+                <YAxis stroke="#8c8c8c" allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="total" fill="#316df5" radius={[12, 12, 0, 0]} />
+                <Bar dataKey="total" fill="#1677ff" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-              No product data is available yet, so there is no category distribution to visualize.
-            </div>
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No product data available yet" />
           )}
         </div>
 
-        {loading ? <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading admin stats...</p> : null}
-        {error ? <p className="mt-4 text-sm text-rose-500">{error}</p> : null}
-      </section>
-    </div>
+        {error ? (
+          <Typography.Paragraph type="danger" style={{ marginTop: 16, marginBottom: 0 }}>
+            <BarChartOutlined /> {` ${error}`}
+          </Typography.Paragraph>
+        ) : null}
+      </Card>
+    </Space>
   );
 }

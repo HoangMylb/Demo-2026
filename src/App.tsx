@@ -1,26 +1,36 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { App as AntApp, Result, Spin } from 'antd';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { MiniCart } from './components/cart/mini-cart';
 import { AppErrorBoundary } from './components/feedback/app-error-boundary';
-import { NotificationProvider, useNotification } from './components/feedback/notification-provider';
+import { SiteFooter } from './components/layout/site-footer';
 import { Navbar } from './components/layout/navbar';
 import { AdminRouteShell } from './components/admin/admin-route-shell';
 import { getCurrentSession, logoutAdmin } from './lib/admin-api';
 import { getStorefrontProductById, getStorefrontProducts } from './lib/storefront-api';
 import { useThemeEffect } from './hooks/use-theme-effect';
-import { AdminDashboardRoute } from './pages/admin-dashboard-route';
-import { AdminProductsRoute } from './pages/admin-products-route';
-import { AdminUsersRoute } from './pages/admin-users-route';
-import { AuthPage } from './pages/auth-page';
-import { HomePage } from './pages/home-page';
-import { NotFoundPage } from './pages/not-found-page';
-import { ProductDetailPage } from './pages/product-detail-page';
-import { ProductsPage } from './pages/products-page';
-import { SettingsPage } from './pages/settings-page';
-import { UnauthorizedPage } from './pages/unauthorized-page';
 import { useCartStore } from './stores/cart-store';
 import type { AdminSession } from './types/admin';
 import type { ProductType } from './types/product';
+
+const HomePage = lazy(() => import('./pages/home-page').then((module) => ({ default: module.HomePage })));
+const ProductsPage = lazy(() => import('./pages/products-page').then((module) => ({ default: module.ProductsPage })));
+const ProductDetailPage = lazy(() => import('./pages/product-detail-page').then((module) => ({ default: module.ProductDetailPage })));
+const AuthPage = lazy(() => import('./pages/auth-page').then((module) => ({ default: module.AuthPage })));
+const SettingsPage = lazy(() => import('./pages/settings-page').then((module) => ({ default: module.SettingsPage })));
+const NotFoundPage = lazy(() => import('./pages/not-found-page').then((module) => ({ default: module.NotFoundPage })));
+const UnauthorizedPage = lazy(() => import('./pages/unauthorized-page').then((module) => ({ default: module.UnauthorizedPage })));
+const AdminDashboardRoute = lazy(() => import('./pages/admin-dashboard-route').then((module) => ({ default: module.AdminDashboardRoute })));
+const AdminProductsRoute = lazy(() => import('./pages/admin-products-route').then((module) => ({ default: module.AdminProductsRoute })));
+const AdminUsersRoute = lazy(() => import('./pages/admin-users-route').then((module) => ({ default: module.AdminUsersRoute })));
+
+function RouteFallback() {
+  return (
+    <div style={{ minHeight: '40vh', display: 'grid', placeItems: 'center' }}>
+      <Spin size="large" tip="Loading experience..." />
+    </div>
+  );
+}
 
 function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const navigate = useNavigate();
@@ -146,7 +156,10 @@ function StoreShell({ children, session, onLogout }: StoreShellProps) {
   return (
     <>
       <Navbar currentPath={currentPath} onNavigate={(path) => navigate(path)} session={session} onLogout={onLogout} />
-      <main className="mx-auto max-w-7xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-7xl px-6 py-10">
+        <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+      </main>
+      <SiteFooter />
     </>
   );
 }
@@ -213,7 +226,7 @@ function AppContent() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
-  const { notify } = useNotification();
+  const { message } = AntApp.useApp();
 
   const syncSession = async () => {
     const nextSession = await getCurrentSession();
@@ -235,51 +248,53 @@ function AppContent() {
     if (session?.isAuthenticated) {
       toggleCart(true);
     }
-    notify(`${product.name} was added to your cart.`);
+    message.success(`${product.name} was added to your cart.`);
   };
 
   return (
     <AppErrorBoundary>
-      <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <StoreShell session={session} onLogout={handleLogout}>
-                <HomeRoute onAddToCart={handleAddToCart} />
-              </StoreShell>
-            }
-          />
-          <Route
-            path="/products"
-            element={
-              <StoreShell session={session} onLogout={handleLogout}>
-                <ProductsRoute onAddToCart={handleAddToCart} />
-              </StoreShell>
-            }
-          />
-          <Route
-            path="/products/:productId"
-            element={
-              <StoreShell session={session} onLogout={handleLogout}>
-                <ProductDetailRoute onAddToCart={handleAddToCart} />
-              </StoreShell>
-            }
-          />
-          <Route
-            path="/auth"
-            element={<AuthRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />}
-          />
-          <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
-          <Route path="/unauthorized" element={<UnauthorizedRoute session={session} onLogout={handleLogout} />} />
-          <Route path="/admin/login" element={<AdminLoginRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />} />
-          <Route path="/admin" element={<AdminRouteShell />}> 
-            <Route index element={<AdminDashboardRoute />} />
-            <Route path="products" element={<AdminProductsRoute />} />
-            <Route path="users" element={<AdminUsersRoute />} />
-          </Route>
-          <Route path="*" element={<NotFoundRoute session={session} onLogout={handleLogout} />} />
-        </Routes>
+      <div className="min-h-screen">
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <StoreShell session={session} onLogout={handleLogout}>
+                  <HomeRoute onAddToCart={handleAddToCart} />
+                </StoreShell>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <StoreShell session={session} onLogout={handleLogout}>
+                  <ProductsRoute onAddToCart={handleAddToCart} />
+                </StoreShell>
+              }
+            />
+            <Route
+              path="/products/:productId"
+              element={
+                <StoreShell session={session} onLogout={handleLogout}>
+                  <ProductDetailRoute onAddToCart={handleAddToCart} />
+                </StoreShell>
+              }
+            />
+            <Route
+              path="/auth"
+              element={<AuthRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />}
+            />
+            <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
+            <Route path="/unauthorized" element={<UnauthorizedRoute session={session} onLogout={handleLogout} />} />
+            <Route path="/admin/login" element={<AdminLoginRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />} />
+            <Route path="/admin" element={<AdminRouteShell />}>
+              <Route index element={<AdminDashboardRoute />} />
+              <Route path="products" element={<AdminProductsRoute />} />
+              <Route path="users" element={<AdminUsersRoute />} />
+            </Route>
+            <Route path="*" element={<NotFoundRoute session={session} onLogout={handleLogout} />} />
+          </Routes>
+        </Suspense>
 
         <MiniCart visible={Boolean(session?.isAuthenticated)} />
       </div>
@@ -288,11 +303,7 @@ function AppContent() {
 }
 
 function App() {
-  return (
-    <NotificationProvider>
-      <AppContent />
-    </NotificationProvider>
-  );
+  return <AppContent />;
 }
 
 export default App;

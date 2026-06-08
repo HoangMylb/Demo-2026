@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminStateCard } from '../components/admin/admin-state-card';
-import { Button } from '../components/ui/button';
+import { Button, Result, Spin } from 'antd';
 import { getAdminProducts, getAdminStats } from '../lib/admin-api';
 import { AdminDashboardPage } from './admin-dashboard-page';
 import type { AdminProduct, AdminStats } from '../types/admin';
@@ -31,16 +30,17 @@ export function AdminDashboardRoute() {
   }, []);
 
   if (loading && !stats) {
-    return <AdminStateCard title="Loading dashboard" description="Fetching statistics and product distribution for the admin overview." />;
+    return <Spin size="large" fullscreen tip="Fetching statistics and product distribution for the admin overview." />;
   }
 
   if (error && !stats) {
     return (
-      <AdminStateCard
+      <Result
+        status="error"
         title="Unable to load dashboard"
-        description={error}
-        action={
-          <Button type="button" variant="secondary" onClick={() => void loadData()}>
+        subTitle={error}
+        extra={
+          <Button type="primary" onClick={() => void loadData()}>
             Retry dashboard load
           </Button>
         }

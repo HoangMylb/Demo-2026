@@ -1,8 +1,8 @@
+import { Button } from 'antd';
 import { motion } from 'framer-motion';
 import { ShoppingCart, Star } from 'lucide-react';
 import type { ProductType } from '../../types/product';
 import { formatCurrency } from '../../utils/format';
-import { Button } from '../ui/button';
 
 interface ProductCardProps {
   product: ProductType;
@@ -15,7 +15,8 @@ export function ProductCard({ product, onViewDetails, onAddToCart }: ProductCard
     <motion.article
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-      className="group overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition dark:border-slate-800 dark:bg-slate-900"
+      className="group overflow-hidden rounded-[1.75rem] border shadow-sm transition"
+      style={{ borderColor: 'var(--color-border-soft)', background: 'var(--color-bg-surface)' }}
     >
       <div className="relative h-64 overflow-hidden">
         <img
@@ -31,10 +32,13 @@ export function ProductCard({ product, onViewDetails, onAddToCart }: ProductCard
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl font-semibold text-slate-950 dark:text-white">{product.name}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{product.description}</p>
+            <h3 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{product.name}</h3>
+            <p className="mt-2 text-sm leading-6" style={{ color: 'var(--color-text-secondary)' }}>{product.description}</p>
           </div>
-          <div className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <div
+            className="flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
+            style={{ background: 'var(--color-bg-surface-soft)', color: 'var(--color-text-secondary)' }}
+          >
             <Star className="h-3.5 w-3.5 fill-current text-amber-400" />
             {product.rating}
           </div>
@@ -42,17 +46,17 @@ export function ProductCard({ product, onViewDetails, onAddToCart }: ProductCard
 
         <div className="mt-5 flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Starting from</p>
-            <p className="text-2xl font-semibold text-slate-950 dark:text-white">{formatCurrency(product.price)}</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Starting from</p>
+            <p className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{formatCurrency(product.price)}</p>
           </div>
 
           <div className="flex gap-2">
             {onViewDetails ? (
-              <Button variant="ghost" onClick={() => onViewDetails(product)}>
+              <Button onClick={() => onViewDetails(product)}>
                 Details
               </Button>
             ) : null}
-            <Button variant="secondary" onClick={() => onAddToCart(product)}>
+            <Button type="primary" onClick={() => onAddToCart(product)}>
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add
             </Button>

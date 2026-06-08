@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AdminStateCard } from '../components/admin/admin-state-card';
-import { Button } from '../components/ui/button';
+import { Button, Result, Spin } from 'antd';
 import { deleteAdminUser, getAdminUsers, getCurrentSession, updateAdminUserAccess } from '../lib/admin-api';
 import { AdminUsersPage } from './admin-users-page';
 import type { AdminSession, AdminUser } from '../types/admin';
@@ -84,16 +83,17 @@ export function AdminUsersRoute() {
   };
 
   if (loading && users.length === 0) {
-    return <AdminStateCard title="Loading users" description="Fetching user accounts and access states for the admin table." />;
+    return <Spin size="large" fullscreen tip="Fetching user accounts and access states for the admin table." />;
   }
 
   if (error && users.length === 0) {
     return (
-      <AdminStateCard
+      <Result
+        status="error"
         title="Unable to load users"
-        description={error}
-        action={
-          <Button type="button" variant="secondary" onClick={() => void loadUsers()}>
+        subTitle={error}
+        extra={
+          <Button type="primary" onClick={() => void loadUsers()}>
             Retry user load
           </Button>
         }

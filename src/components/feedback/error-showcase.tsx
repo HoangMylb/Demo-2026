@@ -1,5 +1,5 @@
+import { Button } from 'antd';
 import { AlertTriangle, ArrowLeft, Home, ShieldAlert } from 'lucide-react';
-import { Button } from '../ui/button';
 
 interface ErrorShowcaseProps {
   eyebrow: string;
@@ -29,27 +29,40 @@ export function ErrorShowcase({
   const icon = variant === 'unauthorized' ? <ShieldAlert className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />;
 
   return (
-    <section className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-hero-radial bg-white px-6 py-16 shadow-soft dark:border-slate-800 dark:bg-slate-900 lg:px-12">
+    <section
+      className="relative overflow-hidden rounded-[2rem] px-6 py-16 shadow-soft lg:px-12"
+      style={{
+        border: '1px solid var(--color-border-soft)',
+        background: 'var(--hero-radial), var(--color-bg-surface)',
+      }}
+    >
       <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent-100 bg-accent-50 px-4 py-2 text-sm font-medium text-accent-700 dark:border-accent-500/20 dark:bg-accent-500/10 dark:text-accent-100">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
+            style={{
+              border: '1px solid var(--color-brand-100)',
+              background: 'var(--color-brand-50)',
+              color: 'var(--color-brand-700)',
+            }}
+          >
             {icon}
             {accentLabel}
           </div>
 
-          <p className="mt-6 text-sm font-medium uppercase tracking-[0.28em] text-accent-600">{eyebrow}</p>
-          <h2 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 dark:text-white md:text-5xl">
+          <p className="mt-6 text-sm font-medium uppercase tracking-[0.28em]" style={{ color: 'var(--color-brand-600)' }}>{eyebrow}</p>
+          <h2 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-5xl" style={{ color: 'var(--color-text-primary)' }}>
             {title}
           </h2>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">{description}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={onGoHome}>
+            <Button type="primary" size="large" onClick={onGoHome}>
               <Home className="mr-2 h-4 w-4" />
               {homeLabel}
             </Button>
             {onGoBack ? (
-              <Button variant="ghost" onClick={onGoBack}>
+              <Button size="large" onClick={onGoBack}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 {backLabel}
               </Button>
@@ -61,11 +74,15 @@ export function ErrorShowcase({
           {highlights.map((item, index) => (
             <div
               key={item}
-              className="rounded-[1.75rem] border border-slate-200 bg-white/85 p-6 dark:border-slate-800 dark:bg-slate-950/60"
+              className="rounded-[1.75rem] p-6"
+              style={{
+                border: '1px solid var(--color-border-soft)',
+                background: 'var(--color-bg-surface-soft)',
+              }}
             >
-              <p className="text-sm font-medium text-accent-600">0{index + 1}</p>
-              <h3 className="mt-3 text-xl font-semibold text-slate-950 dark:text-white">{item}</h3>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm font-medium" style={{ color: 'var(--color-brand-600)' }}>0{index + 1}</p>
+              <h3 className="mt-3 text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item}</h3>
+              <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Clear guidance helps users recover faster instead of getting stranded on a broken route.
               </p>
             </div>

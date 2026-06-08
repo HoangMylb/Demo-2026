@@ -1,20 +1,20 @@
+import { CheckCircleOutlined, LockOutlined, MailOutlined, SaveOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Col, Form, Input, Row, Space, Spin, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getProfile, updateProfile } from '../lib/admin-api';
 import type { AdminSession, Profile } from '../types/admin';
-import { Button } from '../components/ui/button';
 
 interface SettingsPageProps {
   session: AdminSession | null;
 }
 
 export function SettingsPage({ session }: SettingsPageProps) {
+  const [form] = Form.useForm<{ fullName: string; userName: string; email: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [fullName, setFullName] = useState('');
-  const [userName, setUserName] = useState('');
-  const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!session?.isAuthenticated) {
@@ -22,88 +22,131 @@ export function SettingsPage({ session }: SettingsPageProps) {
     }
 
     const loadProfile = async () => {
+      setLoading(true);
       try {
         const response = await getProfile();
         setProfile(response);
-        setFullName(response.fullName);
-        setUserName(response.userName);
-        setEmail(response.email);
+        form.setFieldsValue({
+          fullName: response.fullName,
+          userName: response.userName,
+          email: response.email,
+        });
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load profile.');
+      } finally {
+        setLoading(false);
       }
     };
 
     void loadProfile();
-  }, [session?.isAuthenticated]);
+  }, [form, session?.isAuthenticated]);
 
   if (!session?.isAuthenticated) {
     return <Navigate to="/auth?mode=login" replace />;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSaving(true);
-    setError(null);
-
-    try {
-      const result = await updateProfile({ fullName, userName, email });
-      setProfile(result.data);
-      setFullName(result.data.fullName);
-      setUserName(result.data.userName);
-      setEmail(result.data.email);
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to update profile.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
-    <section className="mx-auto max-w-3xl rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-      <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">Settings</p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Update profile</h2>
-      <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-        Keep your storefront profile current here. Role and account status are shown from the backend, while profile fields can be updated directly.
-      </p>
+    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+      <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.18em', fontSize: 12 }}>
+          Settings
+        </Typography.Text>
+        <Typography.Title level={2} style={{ marginTop: 8, marginBottom: 8 }}>
+          Update profile
+        </Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+          Keep your profile current using the same enterprise-style patterns as the admin workspace.
+        </Typography.Paragraph>
+      </Card>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-        <div className="grid gap-5 md:grid-cols-2">
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Full name</span>
-            <input value={fullName} onChange={(event) => setFullName(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none dark:border-slate-700 dark:bg-slate-950" />
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Username</span>
-            <input value={userName} onChange={(event) => setUserName(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none dark:border-slate-700 dark:bg-slate-950" />
-          </label>
-        </div>
+      <Spin spinning={loading}>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={16}>
+            <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={async (values) => {
+                  setSaving(true);
+                  setError(null);
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Email</span>
-          <input value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none dark:border-slate-700 dark:bg-slate-950" />
-        </label>
+                  try {
+                    const result = await updateProfile(values);
+                    setProfile(result.data);
+                    form.setFieldsValue({
+                      fullName: result.data.fullName,
+                      userName: result.data.userName,
+                      email: result.data.email,
+                    });
+                  } catch (submitError) {
+                    setError(submitError instanceof Error ? submitError.message : 'Unable to update profile.');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={12}>
+                    <Form.Item name="fullName" label="Full name" rules={[{ required: true, message: 'Please enter your full name.' }]}>
+                      <Input prefix={<UserOutlined />} size="large" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item name="userName" label="Username" rules={[{ required: true, message: 'Please enter your username.' }]}>
+                      <Input prefix={<UserOutlined />} size="large" />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/60">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Role</p>
-            <p className="mt-2 text-lg font-semibold capitalize text-slate-950 dark:text-white">{profile?.role ?? session.role ?? 'Unknown'}</p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/60">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Approval</p>
-            <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{profile?.isApproved ? 'Approved' : 'Pending'}</p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-950/60">
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Status</p>
-            <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{profile?.isLocked ? 'Locked' : 'Active'}</p>
-          </div>
-        </div>
+                <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Please enter your email.' }, { type: 'email', message: 'Please enter a valid email.' }]}>
+                  <Input prefix={<MailOutlined />} size="large" />
+                </Form.Item>
 
-        {error ? <p className="text-sm text-rose-500">{error}</p> : null}
+                {error ? <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} /> : null}
 
-        <Button type="submit" variant="secondary" disabled={saving}>
-          {saving ? 'Saving...' : 'Save profile'}
-        </Button>
-      </form>
-    </section>
+                <Button type="primary" htmlType="submit" loading={saving} icon={<SaveOutlined />}>
+                  Save profile
+                </Button>
+              </Form>
+            </Card>
+          </Col>
+
+          <Col xs={24} lg={8}>
+            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+              <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+                <Space direction="vertical" size={10}>
+                  <Tag icon={<SafetyOutlined />} color="blue">Role</Tag>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    {profile?.role ?? session.role ?? 'Unknown'}
+                  </Typography.Title>
+                </Space>
+              </Card>
+
+              <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+                <Space direction="vertical" size={10}>
+                  <Tag icon={<CheckCircleOutlined />} color={profile?.isApproved ? 'green' : 'gold'}>
+                    Approval
+                  </Tag>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    {profile?.isApproved ? 'Approved' : 'Pending'}
+                  </Typography.Title>
+                </Space>
+              </Card>
+
+              <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+                <Space direction="vertical" size={10}>
+                  <Tag icon={<LockOutlined />} color={profile?.isLocked ? 'red' : 'blue'}>
+                    Status
+                  </Tag>
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    {profile?.isLocked ? 'Locked' : 'Active'}
+                  </Typography.Title>
+                </Space>
+              </Card>
+            </Space>
+          </Col>
+        </Row>
+      </Spin>
+    </Space>
   );
 }

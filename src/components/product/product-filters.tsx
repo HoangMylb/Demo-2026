@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Card, Input, Segmented, Space, Typography } from 'antd';
 
 export const productCategories = ['All', 'Audio', 'Wearables', 'Workspace', 'Accessories'] as const;
 export type ProductCategoryFilter = (typeof productCategories)[number];
@@ -12,38 +12,32 @@ interface ProductFiltersProps {
 
 export function ProductFilters({ search, selectedCategory, onSearchChange, onCategoryChange }: ProductFiltersProps) {
   return (
-    <div className="mb-8 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <label className="relative block">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search products, materials, or categories"
-            className="w-full rounded-full border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-accent-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:focus:border-accent-500"
-          />
-        </label>
-
-        <div className="flex flex-wrap gap-2">
-          {productCategories.map((category) => {
-            const active = selectedCategory === category;
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => onCategoryChange(category)}
-                className={`rounded-full px-4 py-3 text-sm font-medium transition ${
-                  active
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
-                }`}
-              >
-                {category}
-              </button>
-            );
-          })}
+    <Card bordered={false} style={{ marginBottom: 32, boxShadow: '0 12px 30px rgba(15, 23, 42, 0.06)' }}>
+      <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <div>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            Refine products
+          </Typography.Title>
+          <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
+            Use standard search and category controls instead of custom filter widgets.
+          </Typography.Paragraph>
         </div>
-      </div>
-    </div>
+
+        <Input.Search
+          allowClear
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search products, materials, or categories"
+          size="large"
+        />
+
+        <Segmented<ProductCategoryFilter>
+          block
+          options={productCategories.map((category) => ({ label: category, value: category }))}
+          value={selectedCategory}
+          onChange={(value) => onCategoryChange(value)}
+        />
+      </Space>
+    </Card>
   );
 }

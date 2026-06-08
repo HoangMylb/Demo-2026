@@ -7,18 +7,18 @@ export default {
     extend: {
       colors: {
         accent: {
-          50: '#eef7ff',
-          100: '#d9ebff',
-          500: '#4f8cff',
-          600: '#316df5',
-          700: '#2457d4',
+          50: 'var(--color-brand-50)',
+          100: 'var(--color-brand-100)',
+          500: 'var(--color-brand-500)',
+          600: 'var(--color-brand-600)',
+          700: 'var(--color-brand-700)',
         },
       },
       boxShadow: {
-        soft: '0 20px 60px rgba(15, 23, 42, 0.12)',
+        soft: 'var(--shadow-soft)',
       },
       backgroundImage: {
-        'hero-radial': 'radial-gradient(circle at top, rgba(79, 140, 255, 0.24), transparent 40%)',
+        'hero-radial': 'var(--hero-radial)',
       },
     },
   },

@@ -1,10 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight, LockKeyhole, Mail, UserRound } from 'lucide-react';
+import { ArrowRightOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Form, Input, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { clearAdminSession, loginAdmin, registerAdmin } from '../../lib/admin-api';
-import { Button } from '../ui/button';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -43,12 +43,20 @@ function AuthFormFrame({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto max-w-md rounded-[2rem] border border-slate-200 bg-white p-8 shadow-soft dark:border-slate-800 dark:bg-slate-900">
-      <p className="text-sm font-medium uppercase tracking-[0.28em] text-accent-600">{eyebrow}</p>
-      <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">{title}</h2>
-      <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{description}</p>
-      {children}
-    </div>
+    <Card bordered={false} style={{ width: '100%', maxWidth: 480, marginInline: 'auto', boxShadow: 'var(--shadow-soft)' }}>
+      <Space direction="vertical" size={6} style={{ width: '100%' }}>
+        <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: 12 }}>
+          {eyebrow}
+        </Typography.Text>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          {title}
+        </Typography.Title>
+        <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
+          {description}
+        </Typography.Paragraph>
+      </Space>
+      <div style={{ marginTop: 28 }}>{children}</div>
+    </Card>
   );
 }
 
@@ -93,40 +101,26 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
           : 'Use your shopper account to unlock the account menu and cart. Example accounts are user@gmail.com / 123456.'
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Email</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
-            <Mail className="h-4 w-4 text-slate-400" />
-            <input
-              {...register('email')}
-              placeholder="hello@lumastore.com"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <div>
+            <Typography.Text strong>Email</Typography.Text>
+            <Input prefix={<MailOutlined />} placeholder="hello@lumastore.com" size="large" {...register('email')} status={errors.email ? 'error' : ''} />
+            {errors.email ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.email.message}</Typography.Paragraph> : null}
           </div>
-          {errors.email ? <p className="mt-2 text-sm text-rose-500">{errors.email.message}</p> : null}
-        </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Password</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
-            <LockKeyhole className="h-4 w-4 text-slate-400" />
-            <input
-              type="password"
-              {...register('password')}
-              placeholder="Enter your password"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            />
+          <div>
+            <Typography.Text strong>Password</Typography.Text>
+            <Input.Password prefix={<LockOutlined />} placeholder="Enter your password" size="large" {...register('password')} status={errors.password ? 'error' : ''} />
+            {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
-          {errors.password ? <p className="mt-2 text-sm text-rose-500">{errors.password.message}</p> : null}
-        </label>
 
-        {submitError ? <p className="text-sm text-rose-500">{submitError}</p> : null}
+          {submitError ? <Alert type="error" showIcon message={submitError} /> : null}
 
-        <Button type="submit" variant="secondary" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Signing in...' : audience === 'admin' ? 'Access admin panel' : 'Login'}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} size="large" block icon={<ArrowRightOutlined />} iconPosition="end">
+            {audience === 'admin' ? 'Access admin panel' : 'Login'}
+          </Button>
+        </Space>
       </form>
     </AuthFormFrame>
   );
@@ -164,53 +158,32 @@ function RegisterForm({ onSuccess }: BaseFormProps) {
       title="Start your premium storefront journey"
       description="Create a shopper account first, then your account dropdown and cart access will appear in the navigation."
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Full name</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
-            <UserRound className="h-4 w-4 text-slate-400" />
-            <input
-              {...register('name')}
-              placeholder="Avery Morgan"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            />
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <div>
+            <Typography.Text strong>Full name</Typography.Text>
+            <Input prefix={<UserOutlined />} placeholder="Avery Morgan" size="large" {...register('name')} status={errors.name ? 'error' : ''} />
+            {errors.name ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.name.message}</Typography.Paragraph> : null}
           </div>
-          {errors.name ? <p className="mt-2 text-sm text-rose-500">{errors.name.message}</p> : null}
-        </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Email</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
-            <Mail className="h-4 w-4 text-slate-400" />
-            <input
-              {...register('email')}
-              placeholder="hello@lumastore.com"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            />
+          <div>
+            <Typography.Text strong>Email</Typography.Text>
+            <Input prefix={<MailOutlined />} placeholder="hello@lumastore.com" size="large" {...register('email')} status={errors.email ? 'error' : ''} />
+            {errors.email ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.email.message}</Typography.Paragraph> : null}
           </div>
-          {errors.email ? <p className="mt-2 text-sm text-rose-500">{errors.email.message}</p> : null}
-        </label>
 
-        <label className="block">
-          <span className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">Password</span>
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-950">
-            <LockKeyhole className="h-4 w-4 text-slate-400" />
-            <input
-              type="password"
-              {...register('password')}
-              placeholder="Create a password"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-            />
+          <div>
+            <Typography.Text strong>Password</Typography.Text>
+            <Input.Password prefix={<LockOutlined />} placeholder="Create a password" size="large" {...register('password')} status={errors.password ? 'error' : ''} />
+            {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
-          {errors.password ? <p className="mt-2 text-sm text-rose-500">{errors.password.message}</p> : null}
-        </label>
 
-        {submitError ? <p className="text-sm text-rose-500">{submitError}</p> : null}
+          {submitError ? <Alert type="error" showIcon message={submitError} /> : null}
 
-        <Button type="submit" variant="secondary" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? 'Creating account...' : 'Create account'}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+          <Button type="primary" htmlType="submit" loading={isSubmitting} size="large" block icon={<ArrowRightOutlined />} iconPosition="end">
+            Create account
+          </Button>
+        </Space>
       </form>
     </AuthFormFrame>
   );
