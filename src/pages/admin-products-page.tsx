@@ -1,10 +1,10 @@
+import { useMemo, useState } from 'react';
 import type { AdminCategoryOption, AdminProduct, ProductPayload } from '../types/admin';
 import { AdminProductForm } from '../components/admin/admin-product-form';
 import { AdminProductsTable } from '../components/admin/admin-products-table';
 import { ConfirmDialog } from '../components/feedback/confirm-dialog';
 import { useNotification } from '../components/feedback/notification-provider';
 import { Modal } from '../components/ui/modal';
-import { useState } from 'react';
 
 interface AdminProductsPageProps {
   products: AdminProduct[];
@@ -33,10 +33,35 @@ export function AdminProductsPage({
 }: AdminProductsPageProps) {
   const { notify } = useNotification();
   const [pendingDeleteProductId, setPendingDeleteProductId] = useState<number | null>(null);
+  const [searchValue, setSearchValue] = useState('');
+
+  const filteredProducts = useMemo(() => {
+    const query = searchValue.trim().toLowerCase();
+
+    if (!query) {
+      return products;
+    }
+
+    return products.filter((product) => {
+      return (
+        product.name.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query) ||
+        product.categoryName.toLowerCase().includes(query)
+      );
+    });
+  }, [products, searchValue]);
 
   return (
     <>
-      <AdminProductsTable products={products} deletingProductId={deletingProductId} onCreate={onOpenCreate} onEdit={onEditProduct} onDelete={async (productId) => setPendingDeleteProductId(productId)} />
+      <AdminProductsTable
+        products={filteredProducts}
+        searchValue={searchValue}
+        deletingProductId={deletingProductId}
+        onCreate={onOpenCreate}
+        onEdit={onEditProduct}
+        onDelete={async (productId) => setPendingDeleteProductId(productId)}
+        onSearchChange={setSearchValue}
+      />
 
       <Modal
         open={isCreateOpen || Boolean(editingProduct)}

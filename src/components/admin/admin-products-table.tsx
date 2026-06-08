@@ -1,17 +1,19 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Search, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import type { AdminProduct } from '../../types/admin';
 import { formatCurrency } from '../../utils/format';
 
 interface AdminProductsTableProps {
   products: AdminProduct[];
+  searchValue: string;
   deletingProductId: number | null;
   onCreate: () => void;
   onEdit: (product: AdminProduct) => void;
   onDelete: (productId: number) => Promise<void>;
+  onSearchChange: (value: string) => void;
 }
 
-export function AdminProductsTable({ products, deletingProductId, onCreate, onEdit, onDelete }: AdminProductsTableProps) {
+export function AdminProductsTable({ products, searchValue, deletingProductId, onCreate, onEdit, onDelete, onSearchChange }: AdminProductsTableProps) {
   return (
     <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 dark:border-slate-800 md:flex-row md:items-center md:justify-between">
@@ -22,6 +24,18 @@ export function AdminProductsTable({ products, deletingProductId, onCreate, onEd
         <Button type="button" variant="secondary" onClick={onCreate}>
           Add product
         </Button>
+      </div>
+
+      <div className="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+        <label className="relative block">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Filter by product name, description, or category"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm outline-none transition focus:border-accent-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:focus:border-accent-500"
+          />
+        </label>
       </div>
 
       <div className="overflow-x-auto">
@@ -64,6 +78,13 @@ export function AdminProductsTable({ products, deletingProductId, onCreate, onEd
                 </td>
               </tr>
             ))}
+            {products.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                  No products match the current filter.
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
