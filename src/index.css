@@ -60,6 +60,21 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+body,
+.ant-typography,
+.ant-card,
+.ant-modal,
+.ant-table,
+.ant-dropdown,
+.ant-select,
+.ant-input,
+.ant-input-number,
+.ant-btn,
+.ant-form,
+.ant-drawer {
+  color: var(--color-text-primary);
+}
+
 #root {
   @apply min-h-screen;
 }
@@ -75,13 +90,137 @@ body {
   box-shadow: var(--shadow-soft) !important;
 }
 
+.admin-account-dropdown .ant-dropdown-menu {
+  background: var(--color-bg-surface) !important;
+  border: 1px solid var(--color-border-soft) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
 .site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item,
 .site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-title-content,
-.site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item a {
+.site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item a,
+.admin-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item,
+.admin-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-title-content,
+.admin-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item a,
+.ant-dropdown-menu .ant-dropdown-menu-item,
+.ant-dropdown-menu .ant-dropdown-menu-title-content {
   color: var(--color-text-primary) !important;
 }
 
 .site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item:hover,
-.site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-active {
+.site-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-active,
+.admin-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item:hover,
+.admin-account-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-active,
+.ant-dropdown-menu .ant-dropdown-menu-item:hover,
+.ant-dropdown-menu .ant-dropdown-menu-item-active,
+.ant-dropdown-menu .ant-dropdown-menu-item-selected {
+  background: var(--color-bg-surface-soft) !important;
+}
+
+.ant-layout,
+.ant-layout-sider,
+.ant-layout-header,
+.ant-layout-content,
+.ant-card,
+.ant-modal .ant-modal-content,
+.ant-modal .ant-modal-header,
+.ant-drawer .ant-drawer-content,
+.ant-select-dropdown,
+.ant-dropdown .ant-dropdown-menu,
+.ant-popover .ant-popover-inner,
+.ant-popconfirm .ant-popover-inner {
+  background: var(--color-bg-surface) !important;
+}
+
+.ant-card,
+.ant-modal .ant-modal-content,
+.ant-select-selector,
+.ant-input,
+.ant-input-number,
+.ant-dropdown .ant-dropdown-menu,
+.ant-table-wrapper,
+.ant-table-container {
+  border-color: var(--color-border-soft) !important;
+}
+
+.ant-modal .ant-modal-title,
+.ant-modal .ant-modal-close,
+.ant-card .ant-card-head-title,
+.ant-select-selection-item,
+.ant-select-item,
+.ant-form-item-label > label,
+.ant-input,
+.ant-input-number-input,
+.ant-input::placeholder,
+.ant-input-textarea textarea,
+.ant-btn,
+.ant-table-cell,
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td,
+.ant-empty-description,
+.ant-drawer-title,
+.ant-drawer-body,
+.ant-typography {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-input::placeholder,
+.ant-select-selection-placeholder,
+.ant-form-item-explain,
+.ant-typography.ant-typography-secondary,
+.ant-table-thead > tr > th .ant-table-column-title,
+.ant-table-tbody .ant-typography.ant-typography-secondary,
+.ant-modal .ant-typography.ant-typography-secondary {
+  color: var(--color-text-secondary) !important;
+}
+
+.ant-menu {
+  background: transparent !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-menu-light.ant-menu-horizontal > .ant-menu-item-selected,
+.ant-menu-light > .ant-menu .ant-menu-item-selected,
+.ant-menu-light.ant-menu-inline .ant-menu-item-selected,
+.ant-menu-light.ant-menu-inline .ant-menu-submenu-selected > .ant-menu-submenu-title,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected,
+.ant-menu-dark > .ant-menu .ant-menu-item-selected,
+.ant-menu-dark.ant-menu-inline .ant-menu-item-selected,
+.ant-menu-dark.ant-menu-inline .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  border-radius: 12px !important;
+}
+
+.ant-menu-item,
+.ant-menu-submenu-title,
+.ant-menu-title-content,
+.ant-menu-item-icon,
+.ant-menu-submenu-arrow {
+  color: var(--color-text-primary) !important;
+}
+
+.ant-menu-item:hover,
+.ant-menu-submenu-title:hover,
+.ant-menu-horizontal > .ant-menu-item:hover,
+.ant-menu-inline .ant-menu-item:hover {
+  background: var(--color-bg-surface-soft) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-table-wrapper .ant-table {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-bottom: 1px solid var(--color-border-soft) !important;
+}
+
+.ant-table-tbody > tr:hover > td,
+.ant-table-tbody > tr > td.ant-table-cell-row-hover {
   background: var(--color-bg-surface-soft) !important;
 }

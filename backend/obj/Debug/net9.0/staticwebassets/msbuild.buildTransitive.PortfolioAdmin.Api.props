@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../buildMultiTargeting/PortfolioAdmin.Api.props" />
-</Project>

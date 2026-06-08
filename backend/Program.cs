@@ -58,9 +58,18 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy("Frontend", policy =>
+  options.AddPolicy("LocalFrontend", policy =>
   {
-    policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+    policy
+      .WithOrigins(
+        "http://localhost:5173",
+        "https://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://127.0.0.1:5173"
+      )
+      .AllowAnyHeader()
+      .AllowAnyMethod()
+      .AllowCredentials();
   });
 });
 
@@ -92,11 +101,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
-  app.UseSwaggerUI();
+app.UseSwaggerUI();
 }
 app.UseRouting();
 app.UseHttpsRedirection();
-app.UseCors("AllowVercel");
+app.UseCors(app.Environment.IsDevelopment() ? "LocalFrontend" : "AllowVercel");
 app.UseAuthentication();
 app.UseAuthorization();
 

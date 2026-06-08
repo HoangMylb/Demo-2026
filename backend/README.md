@@ -23,7 +23,13 @@ Example connection string format:
 Host=aws-1-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.jisbeenthdzlfvorvwzn;Password=YOUR_PASSWORD;SSL Mode=Require;Trust Server Certificate=true
 ```
 
-Then run:
+For the frontend, create a local environment file at the repo root:
+
+```bash
+cp .env.example .env.local
+```
+
+Then run the backend:
 
 ```bash
 dotnet restore
@@ -39,4 +45,14 @@ export SUPABASE_CONNECTION_STRING="Host=db.jisbeenthdzlfvorvwzn.supabase.co;Port
 export SUPABASE_CONNECTION_STRING="Host=aws-1-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.jisbeenthdzlfvorvwzn;Password=YOUR_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
 ```
 
-The frontend is configured to call `http://localhost:5000/api/admin` by default, but you can override that with `VITE_API_BASE_URL`.
+The frontend should use `VITE_API_BASE_URL=http://localhost:5000` (or `https://localhost:5001` if you prefer HTTPS locally).
+
+## Deploy / production
+
+For deployed frontend environments, set:
+
+```bash
+VITE_API_BASE_URL=https://hoangmydemo-api.onrender.com
+```
+
+The backend now uses localhost CORS/cookie settings in Development and the deployed origin policy outside Development.

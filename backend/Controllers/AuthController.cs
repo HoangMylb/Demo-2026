@@ -14,10 +14,11 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(AppDbContext context, IConfiguration configuration) : ControllerBase
+public class AuthController(AppDbContext context, IConfiguration configuration, IWebHostEnvironment environment) : ControllerBase
 {
   private readonly AppDbContext _context = context;
   private readonly IConfiguration _configuration = configuration;
+  private readonly IWebHostEnvironment _environment = environment;
   private const string AuthCookieName = "demo2026_auth";
 
   [HttpPost("register")]
@@ -73,7 +74,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
 
     var token = CreateJwt(user);
     var serializedToken = new JwtSecurityTokenHandler().WriteToken(token);
-    Response.Cookies.Append(AuthCookieName, serializedToken, BuildCookieOptions(token.ValidTo));
+    Response.Cookies.Append(AuthCookieName, serializedToken, BuildCookieOptions(token.ValidTo, _environment));
 
     return this.ApiOk(new LoginResponseDto(
       user.Email,
@@ -107,7 +108,7 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
   [HttpPost("logout")]
   public IActionResult Logout()
   {
-    Response.Cookies.Delete(AuthCookieName, BuildCookieOptions(DateTimeOffset.UtcNow));
+    Response.Cookies.Delete(AuthCookieName, BuildCookieOptions(DateTimeOffset.UtcNow, _environment));
     return this.ApiOk<object?>(null, "Logged out successfully.");
   }
 
@@ -140,11 +141,11 @@ public class AuthController(AppDbContext context, IConfiguration configuration) 
     );
   }
 
-  private static CookieOptions BuildCookieOptions(DateTimeOffset expiresAt) => new()
+  private static CookieOptions BuildCookieOptions(DateTimeOffset expiresAt, IWebHostEnvironment environment) => new()
   {
     HttpOnly = true,
-    Secure = true,
-    SameSite = SameSiteMode.None,
+    Secure = !environment.IsDevelopment(),
+    SameSite = environment.IsDevelopment() ? SameSiteMode.Lax : SameSiteMode.None,
     Expires = expiresAt,
     Path = "/"
   };

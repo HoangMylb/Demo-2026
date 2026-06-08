@@ -139,6 +139,7 @@ export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, se
                 ],
               }}
               trigger={['click']}
+              overlayClassName="admin-account-dropdown"
             >
               <Button type="text" style={{ height: 'auto', padding: 0 }}>
                 <Space>
