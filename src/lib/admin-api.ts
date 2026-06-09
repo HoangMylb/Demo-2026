@@ -1,6 +1,7 @@
 import type { AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
+import { getApiBaseUrl } from './api-base-url';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
+const API_BASE_URL = getApiBaseUrl();
 
 interface ApiEnvelope<T> {
   code: number;

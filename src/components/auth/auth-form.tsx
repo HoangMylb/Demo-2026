@@ -5,8 +5,9 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { clearAdminSession, getAuthProviderAvailability, loginAdmin, registerAdmin } from '../../lib/admin-api';
+import { getApiBaseUrl } from '../../lib/api-base-url';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
+const API_BASE_URL = getApiBaseUrl();
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
