@@ -39,6 +39,23 @@ export interface AdminUser {
   createdAtUtc: string;
 }
 
+export interface AdminReview {
+  id: number;
+  productId: number;
+  productName: string;
+  categoryName: string;
+  userId: number;
+  customerName: string;
+  rating: number;
+  comment: string;
+  variantType: string;
+  color: string;
+  size: string;
+  helpfulCount: number;
+  purchasedAtUtc: string;
+  createdAtUtc: string;
+}
+
 export interface UserAccessPayload {
   fullName?: string;
   userName?: string;
@@ -46,6 +63,14 @@ export interface UserAccessPayload {
   role?: 'Admin' | 'User';
   isLocked?: boolean;
   isApproved?: boolean;
+}
+
+export interface CreateAdminUserPayload {
+  fullName: string;
+  userName: string;
+  email: string;
+  password: string;
+  role: 'Admin' | 'User';
 }
 
 export interface Profile {

@@ -9,6 +9,7 @@ public class Product
   public string ImageUrl { get; set; } = string.Empty;
   public int CategoryId { get; set; }
   public Category? Category { get; set; }
+  public ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
   public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
   public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }

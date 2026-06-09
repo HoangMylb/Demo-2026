@@ -1,4 +1,4 @@
-import type { AdminProduct, AdminSession, AdminStats, AdminUser, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
+import type { AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
 
@@ -34,6 +34,11 @@ interface RegisterResponse {
   email: string;
   userName: string;
   role: string;
+}
+
+interface AuthProviderAvailability {
+  google: boolean;
+  facebook: boolean;
 }
 
 export function getStoredAdminSession(): AdminSession | null {
@@ -100,6 +105,19 @@ export async function registerAdmin(fullName: string, email: string, password: s
 
   const payload = (await response.json()) as ApiEnvelope<RegisterResponse>;
   return mapSession(payload.data);
+}
+
+export async function getAuthProviderAvailability(): Promise<AuthProviderAvailability> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/providers`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Auth provider request failed with status ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as ApiEnvelope<AuthProviderAvailability>;
+  return payload.data;
 }
 
 async function getSessionResponse() {
@@ -203,6 +221,18 @@ export async function deleteAdminProduct(id: number): Promise<{ message: string 
 
 export async function getAdminUsers(): Promise<AdminUser[]> {
   return (await request<AdminUser[]>('/api/admin/users')).data;
+}
+
+export async function getAdminReviews(): Promise<AdminReview[]> {
+  return (await request<AdminReview[]>('/api/admin/reviews')).data;
+}
+
+export async function deleteAdminReview(id: number): Promise<{ message: string }> {
+  return requestWithoutJson(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+}
+
+export async function createAdminUser(payload: CreateAdminUserPayload): Promise<ApiResult<AdminUser>> {
+  return request<AdminUser>('/api/admin/users', { method: 'POST', body: JSON.stringify(payload) });
 }
 
 export async function updateAdminUserAccess(id: number, payload: UserAccessPayload): Promise<ApiResult<AdminUser>> {

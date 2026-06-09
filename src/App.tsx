@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { App as AntApp, Result, Spin } from 'antd';
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { AddToCartModal } from './components/cart/add-to-cart-modal';
 import { MiniCart } from './components/cart/mini-cart';
 import { AppErrorBoundary } from './components/feedback/app-error-boundary';
 import { SiteFooter } from './components/layout/site-footer';
@@ -11,7 +12,7 @@ import { getStorefrontProductById, getStorefrontProducts } from './lib/storefron
 import { useThemeEffect } from './hooks/use-theme-effect';
 import { useCartStore } from './stores/cart-store';
 import type { AdminSession } from './types/admin';
-import type { ProductType } from './types/product';
+import type { ProductDetail, ProductType } from './types/product';
 
 const HomePage = lazy(() => import('./pages/home-page').then((module) => ({ default: module.HomePage })));
 const ProductsPage = lazy(() => import('./pages/products-page').then((module) => ({ default: module.ProductsPage })));
@@ -23,18 +24,29 @@ const UnauthorizedPage = lazy(() => import('./pages/unauthorized-page').then((mo
 const AdminDashboardRoute = lazy(() => import('./pages/admin-dashboard-route').then((module) => ({ default: module.AdminDashboardRoute })));
 const AdminProductsRoute = lazy(() => import('./pages/admin-products-route').then((module) => ({ default: module.AdminProductsRoute })));
 const AdminUsersRoute = lazy(() => import('./pages/admin-users-route').then((module) => ({ default: module.AdminUsersRoute })));
+const AdminReviewsRoute = lazy(() => import('./pages/admin-reviews-route').then((module) => ({ default: module.AdminReviewsRoute })));
 
 function RouteFallback() {
   return (
     <div style={{ minHeight: '40vh', display: 'grid', placeItems: 'center' }}>
-      <Spin size="large" tip="Loading experience..." />
+      <Spin size="large" description="Loading experience..." />
     </div>
   );
 }
 
 function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [session, setSession] = useState<AdminSession | null>(null);
   const [products, setProducts] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    void getCurrentSession().then(setSession).catch(() => setSession(null));
+  }, []);
+
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
 
   useEffect(() => {
     let active = true;
@@ -71,7 +83,17 @@ function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => voi
 
 function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [session, setSession] = useState<AdminSession | null>(null);
   const [products, setProducts] = useState<ProductType[]>([]);
+
+  useEffect(() => {
+    void getCurrentSession().then(setSession).catch(() => setSession(null));
+  }, []);
+
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
 
   useEffect(() => {
     let active = true;
@@ -105,9 +127,15 @@ function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) =>
   );
 }
 
-function ProductDetailRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => void }) {
+function ProductDetailRoute({ onAddToCart, session }: { onAddToCart: (product: ProductType) => void; session: AdminSession | null }) {
   const { productId } = useParams();
-  const [product, setProduct] = useState<ProductType | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
 
   useEffect(() => {
     let active = true;
@@ -139,7 +167,14 @@ function ProductDetailRoute({ onAddToCart }: { onAddToCart: (product: ProductTyp
     };
   }, [productId]);
 
-  return <ProductDetailPage product={product} onAddToCart={onAddToCart} />;
+  return <ProductDetailPage product={product} onAddToCart={onAddToCart} onViewDetails={(nextProduct) => navigate(`/products/${nextProduct.id}`)} session={session} onReviewCreated={async () => {
+    if (!productId) {
+      return;
+    }
+
+    const response = await getStorefrontProductById(productId);
+    setProduct(response);
+  }} />;
 }
 
 interface StoreShellProps {
@@ -224,13 +259,18 @@ function AppContent() {
   useThemeEffect();
 
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [pendingCartProduct, setPendingCartProduct] = useState<ProductType | null>(null);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { message } = AntApp.useApp();
 
   const syncSession = async () => {
-    const nextSession = await getCurrentSession();
-    setSession(nextSession);
+    try {
+      const nextSession = await getCurrentSession();
+      setSession(nextSession);
+    } catch {
+      setSession(null);
+    }
   };
 
   const handleLogout = async () => {
@@ -244,11 +284,14 @@ function AppContent() {
   }, []);
 
   const handleAddToCart = (product: ProductType) => {
-    addItem(product);
-    if (session?.isAuthenticated) {
-      toggleCart(true);
-    }
-    message.success(`${product.name} was added to your cart.`);
+    setPendingCartProduct(product);
+  };
+
+  const handleConfirmAddToCart = (product: ProductType, quantity: number) => {
+    addItem(product, quantity);
+    toggleCart(true);
+    setPendingCartProduct(null);
+    message.success(`${quantity} × ${product.name} was added to your cart.`);
   };
 
   return (
@@ -276,7 +319,7 @@ function AppContent() {
               path="/products/:productId"
               element={
                 <StoreShell session={session} onLogout={handleLogout}>
-                  <ProductDetailRoute onAddToCart={handleAddToCart} />
+                  <ProductDetailRoute onAddToCart={handleAddToCart} session={session} />
                 </StoreShell>
               }
             />
@@ -287,16 +330,23 @@ function AppContent() {
             <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
             <Route path="/unauthorized" element={<UnauthorizedRoute session={session} onLogout={handleLogout} />} />
             <Route path="/admin/login" element={<AdminLoginRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />} />
-            <Route path="/admin" element={<AdminRouteShell />}>
+            <Route path="/admin" element={<AdminRouteShell onSessionCleared={() => setSession(null)} />}>
               <Route index element={<AdminDashboardRoute />} />
               <Route path="products" element={<AdminProductsRoute />} />
               <Route path="users" element={<AdminUsersRoute />} />
+              <Route path="reviews" element={<AdminReviewsRoute />} />
             </Route>
             <Route path="*" element={<NotFoundRoute session={session} onLogout={handleLogout} />} />
           </Routes>
         </Suspense>
 
-        <MiniCart visible={Boolean(session?.isAuthenticated)} />
+        <MiniCart visible />
+        <AddToCartModal
+          product={pendingCartProduct}
+          open={Boolean(pendingCartProduct)}
+          onCancel={() => setPendingCartProduct(null)}
+          onConfirm={handleConfirmAddToCart}
+        />
       </div>
     </AppErrorBoundary>
   );

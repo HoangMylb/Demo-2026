@@ -1,5 +1,5 @@
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
-import { Button, Drawer, Empty, Image, List, Space, Typography } from 'antd';
+import { Button, Drawer, Empty, Image, List, Popconfirm, Space, Typography } from 'antd';
 import { useCartStore } from '../../stores/cart-store';
 import { formatCurrency } from '../../utils/format';
 
@@ -23,7 +23,7 @@ export function MiniCart({ visible }: MiniCartProps) {
     <Drawer
       title="Your cart"
       placement="right"
-      width={420}
+      size={420}
       onClose={() => toggleCart(false)}
       open={isOpen}
       extra={
@@ -34,7 +34,7 @@ export function MiniCart({ visible }: MiniCartProps) {
         ) : null
       }
       footer={
-        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography.Text type="secondary">Total</Typography.Text>
             <Typography.Title level={4} style={{ margin: 0 }}>
@@ -59,14 +59,23 @@ export function MiniCart({ visible }: MiniCartProps) {
           renderItem={(item) => (
             <List.Item
               actions={[
-                <Button key="remove" type="text" danger icon={<DeleteOutlined />} onClick={() => removeItem(item.id)} />,
+                <Popconfirm
+                  key="remove"
+                  title="Remove item"
+                  description={`Remove ${item.name} from your cart?`}
+                  okText="Remove"
+                  cancelText="Cancel"
+                  onConfirm={() => removeItem(item.id)}
+                >
+                  <Button type="text" danger icon={<DeleteOutlined />} />
+                </Popconfirm>,
               ]}
             >
               <List.Item.Meta
                 avatar={<Image src={item.image} alt={item.name} width={72} height={72} style={{ borderRadius: 12, objectFit: 'cover' }} />}
                 title={<Typography.Text strong>{item.name}</Typography.Text>}
                 description={
-                  <Space direction="vertical" size={2}>
+                  <Space orientation="vertical" size={2}>
                     <Typography.Text type="secondary">Qty {item.quantity}</Typography.Text>
                     <Typography.Text>{formatCurrency(item.price * item.quantity)}</Typography.Text>
                   </Space>

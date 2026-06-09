@@ -27,10 +27,10 @@ export function AuthPage({ audience, onSuccess }: AuthPageProps) {
   const heading = useMemo(
     () =>
       audience === 'admin'
-        ? 'Use the isolated admin sign-in so operations access stays separate from the storefront experience.'
+        ? 'Admin sign-in'
         : mode === 'login'
-          ? 'Use the standard sign-in flow to restore account access, cart controls, and storefront tools.'
-          : 'Create a shopper account with a conventional form flow that client teams can understand immediately.',
+          ? 'Sign in to continue shopping'
+          : 'Create a shopper account',
     [audience, mode],
   );
 
@@ -44,16 +44,14 @@ export function AuthPage({ audience, onSuccess }: AuthPageProps) {
   return (
     <section style={{ display: 'grid', gap: 24 }}>
       <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={10} style={{ width: '100%' }}>
           <Tag color={audience === 'admin' ? 'red' : 'blue'} style={{ width: 'fit-content' }}>
             {audience === 'admin' ? 'Admin authentication' : 'Store account'}
           </Tag>
           <Typography.Title level={2} style={{ margin: 0 }}>
-            {audience === 'admin' ? 'Separate admin login for protected operations.' : 'Account access that unlocks the storefront tools.'}
+            {audience === 'admin' ? 'Admin login' : 'Sign in to continue shopping'}
           </Typography.Title>
-          <Typography.Paragraph type="secondary" style={{ marginBottom: 0, maxWidth: 760 }}>
-            {heading}
-          </Typography.Paragraph>
+          <Typography.Paragraph type="secondary" style={{ marginBottom: 0, maxWidth: 760 }}>{heading}</Typography.Paragraph>
 
           {allowRegister ? (
             <Segmented

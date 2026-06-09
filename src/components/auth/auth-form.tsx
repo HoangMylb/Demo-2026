@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRightOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, FacebookFilled, GoogleOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Form, Input, Space, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { clearAdminSession, loginAdmin, registerAdmin } from '../../lib/admin-api';
+import { clearAdminSession, getAuthProviderAvailability, loginAdmin, registerAdmin } from '../../lib/admin-api';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://hoangmydemo-api.onrender.com';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -44,7 +46,7 @@ function AuthFormFrame({
 }) {
   return (
     <Card bordered={false} style={{ width: '100%', maxWidth: 480, marginInline: 'auto', boxShadow: 'var(--shadow-soft)' }}>
-      <Space direction="vertical" size={6} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={6} style={{ width: '100%' }}>
         <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: 12 }}>
           {eyebrow}
         </Typography.Text>
@@ -62,6 +64,7 @@ function AuthFormFrame({
 
 function LoginForm({ audience, onSuccess }: BaseFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [providerAvailability, setProviderAvailability] = useState({ google: false, facebook: false });
   const {
     control,
     handleSubmit,
@@ -91,18 +94,50 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
     }
   };
 
+  useEffect(() => {
+    if (audience !== 'store') {
+      return;
+    }
+
+    let active = true;
+
+    const loadProviderAvailability = async () => {
+      try {
+        const response = await getAuthProviderAvailability();
+        if (active) {
+          setProviderAvailability(response);
+        }
+      } catch {
+        if (active) {
+          setProviderAvailability({ google: false, facebook: false });
+        }
+      }
+    };
+
+    void loadProviderAvailability();
+
+    return () => {
+      active = false;
+    };
+  }, [audience]);
+
+  const handleExternalLogin = (provider: 'Google' | 'Facebook') => {
+    const returnUrl = audience === 'admin' ? '/admin' : '/';
+    window.location.href = `${API_BASE_URL}/api/auth/external/${provider}?returnUrl=${encodeURIComponent(returnUrl)}`;
+  };
+
   return (
     <AuthFormFrame
       eyebrow="Welcome back"
       title={audience === 'admin' ? 'Sign in to manage the admin workspace' : 'Sign in to continue shopping'}
       description={
         audience === 'admin'
-          ? 'Admin access is separated from the storefront. Use an administrator account such as admin@gmail.com / 123456.'
-          : 'Use your shopper account to unlock the account menu and cart. Example accounts are user@gmail.com / 123456.'
+          ? 'Use your administrator account.'
+          : 'Use your shopper account.'
       }
     >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <div>
             <Typography.Text strong>Email</Typography.Text>
             <Controller
@@ -139,7 +174,25 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
             {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
 
-          {submitError ? <Alert type="error" showIcon message={submitError} /> : null}
+          {submitError ? <Alert type="error" showIcon title={submitError} /> : null}
+
+          {audience === 'store' && (providerAvailability.google || providerAvailability.facebook) ? (
+            <Space orientation="vertical" size={10} style={{ width: '100%' }}>
+              <Typography.Text type="secondary" style={{ textAlign: 'center', display: 'block' }}>
+                OR
+              </Typography.Text>
+              {providerAvailability.google ? (
+                <Button size="large" block icon={<GoogleOutlined />} onClick={() => handleExternalLogin('Google')}>
+                  Login with Google
+                </Button>
+              ) : null}
+              {providerAvailability.facebook ? (
+                <Button size="large" block icon={<FacebookFilled />} onClick={() => handleExternalLogin('Facebook')}>
+                  Login with Facebook
+                </Button>
+              ) : null}
+            </Space>
+          ) : null}
 
           <Button type="primary" htmlType="submit" loading={isSubmitting} size="large" block icon={<ArrowRightOutlined />} iconPosition="end">
             {audience === 'admin' ? 'Access admin panel' : 'Login'}
@@ -183,7 +236,7 @@ function RegisterForm({ onSuccess }: BaseFormProps) {
       description="Create a shopper account first, then your account dropdown and cart access will appear in the navigation."
     >
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <div>
             <Typography.Text strong>Full name</Typography.Text>
             <Controller
@@ -238,7 +291,7 @@ function RegisterForm({ onSuccess }: BaseFormProps) {
             {errors.password ? <Typography.Paragraph type="danger" style={{ margin: '8px 0 0' }}>{errors.password.message}</Typography.Paragraph> : null}
           </div>
 
-          {submitError ? <Alert type="error" showIcon message={submitError} /> : null}
+          {submitError ? <Alert type="error" showIcon title={submitError} /> : null}
 
           <Button type="primary" htmlType="submit" loading={isSubmitting} size="large" block icon={<ArrowRightOutlined />} iconPosition="end">
             Create account

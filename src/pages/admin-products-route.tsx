@@ -80,7 +80,7 @@ export function AdminProductsRoute() {
   };
 
   if (loading && products.length === 0) {
-    return <Spin size="large" fullscreen tip="Fetching inventory data for the product management workspace." />;
+    return <Spin size="large" fullscreen description="Fetching inventory data for the product management workspace." />;
   }
 
   if (error && products.length === 0) {

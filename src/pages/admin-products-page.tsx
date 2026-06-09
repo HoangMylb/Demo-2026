@@ -1,5 +1,5 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { App, Button, Card, Divider, Form, Image, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Typography, Upload } from 'antd';
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
+import { App, Button, Card, Divider, Dropdown, Form, Image, Input, InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Typography, Upload } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import type { ColumnsType } from 'antd/es/table';
 import type { AdminCategoryOption, AdminProduct, ProductPayload } from '../types/admin';
@@ -54,24 +54,24 @@ export function AdminProductsPage({
   const [form] = Form.useForm<ProductPayload>();
   const [submitting, setSubmitting] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
   const [imageInputMode, setImageInputMode] = useState<ImageInputMode>('url');
   const [selectedFileName, setSelectedFileName] = useState('');
 
   const filteredProducts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
 
-    if (!query) {
-      return products;
-    }
-
     return products.filter((product) => {
-      return (
+      const matchesSearch =
+        !query ||
         product.name.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query) ||
-        product.categoryName.toLowerCase().includes(query)
-      );
+        product.categoryName.toLowerCase().includes(query);
+      const matchesCategory = categoryFilter === 'all' || product.categoryId === categoryFilter;
+
+      return matchesSearch && matchesCategory;
     });
-  }, [products, searchValue]);
+  }, [categoryFilter, products, searchValue]);
 
   useEffect(() => {
     const initialCategoryId = categoryOptions[0]?.id ?? editingProduct?.categoryId ?? 0;
@@ -104,7 +104,7 @@ export function AdminProductsPage({
       render: (_, product) => (
         <Space align="start" size="middle">
           <Image src={product.imageUrl} alt={product.name} width={56} height={56} style={{ borderRadius: 12, objectFit: 'cover' }} />
-          <Space direction="vertical" size={2}>
+          <Space orientation="vertical" size={2}>
             <Typography.Text strong>{product.name}</Typography.Text>
             <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }} ellipsis={{ rows: 2 }}>
               {product.description}
@@ -157,6 +157,25 @@ export function AdminProductsPage({
               Delete
             </Button>
           </Popconfirm>
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'duplicate-info',
+                  label: `Category: ${product.categoryName}`,
+                  disabled: true,
+                },
+                {
+                  key: 'updated-info',
+                  label: `Updated: ${new Date(product.updatedAtUtc).toLocaleDateString()}`,
+                  disabled: true,
+                },
+              ],
+            }}
+            trigger={['click']}
+          >
+            <Button icon={<EllipsisOutlined />} aria-label="More product actions" />
+          </Dropdown>
         </Space>
       ),
     },
@@ -164,16 +183,13 @@ export function AdminProductsPage({
 
   return (
     <>
-      <Space direction="vertical" size={20} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={20} style={{ width: '100%' }}>
         <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
           <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
             <div>
               <Typography.Title level={3} style={{ margin: 0 }}>
                 Product management
               </Typography.Title>
-              <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
-                Standard inventory workflows with a cleaner handoff story for client teams.
-              </Typography.Paragraph>
             </div>
 
             <Button type="primary" icon={<PlusOutlined />} onClick={onOpenCreate}>
@@ -183,12 +199,24 @@ export function AdminProductsPage({
 
           <Divider style={{ margin: '16px 0' }} />
 
-          <Input.Search
-            allowClear
-            placeholder="Filter by product name, description, or category"
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-          />
+          <Space size={12} wrap style={{ width: '100%' }}>
+            <Input.Search
+              allowClear
+              placeholder="Search products"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              style={{ flex: '1 1 280px', minWidth: 240 }}
+            />
+            <Select
+              value={categoryFilter}
+              style={{ minWidth: 180 }}
+              onChange={setCategoryFilter}
+              options={[
+                { value: 'all', label: 'All categories' },
+                ...categoryOptions.map((category) => ({ value: category.id, label: category.name })),
+              ]}
+            />
+          </Space>
         </Card>
 
         <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
@@ -212,10 +240,10 @@ export function AdminProductsPage({
         confirmLoading={submitting}
         destroyOnClose
         width={720}
-      >
-        <Form
-          form={form}
-          layout="vertical"
+        >
+          <Form
+            form={form}
+            layout="vertical"
           onFinish={async (values) => {
             setSubmitting(true);
 
@@ -229,10 +257,6 @@ export function AdminProductsPage({
             }
           }}
         >
-          <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
-            Use a structured product form instead of custom modal logic so the flow remains easy to extend and hand off.
-          </Typography.Paragraph>
-
           <Form.Item name="name" label="Product name" rules={[{ required: true, message: 'Please enter the product name.' }]}>
             <Input placeholder="Luma Air Headphones" />
           </Form.Item>

@@ -39,10 +39,23 @@ public record SessionDto(
   string Role
 );
 
+public record AuthProviderAvailabilityDto(
+  bool Google,
+  bool Facebook
+);
+
 public record RegisterRequestDto(
   string FullName,
   string Email,
   string Password
+);
+
+public record CreateAdminUserDto(
+  string FullName,
+  string UserName,
+  string Email,
+  string Password,
+  string Role
 );
 
 public class UpdateUserAccessDto

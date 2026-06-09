@@ -8,9 +8,10 @@ const routeToView: Record<string, AdminView> = {
   '/admin': 'dashboard',
   '/admin/products': 'products',
   '/admin/users': 'users',
+  '/admin/reviews': 'reviews',
 };
 
-export function AdminRouteShell() {
+export function AdminRouteShell({ onSessionCleared }: { onSessionCleared?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
@@ -32,13 +33,14 @@ export function AdminRouteShell() {
 
   const handleNavigate = (view: AdminView) => {
     const nextPath =
-      view === 'dashboard' ? '/admin' : view === 'products' ? '/admin/products' : '/admin/users';
+      view === 'dashboard' ? '/admin' : view === 'products' ? '/admin/products' : view === 'users' ? '/admin/users' : '/admin/reviews';
     navigate(nextPath);
   };
 
   const handleExit = async () => {
     await logoutAdmin();
     setAdminSession(null);
+    onSessionCleared?.();
     navigate('/', { replace: true });
   };
 
@@ -46,7 +48,7 @@ export function AdminRouteShell() {
       <AdminLayout
         activeView={activeView}
         onNavigate={handleNavigate}
-        onExit={handleExit}
+        onLogout={handleExit}
         onOpenSettings={() => navigate('/settings')}
         sessionRole={adminSession?.role ?? null}
         sessionEmail={adminSession?.email ?? null}

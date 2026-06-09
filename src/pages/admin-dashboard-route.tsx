@@ -30,7 +30,7 @@ export function AdminDashboardRoute() {
   }, []);
 
   if (loading && !stats) {
-    return <Spin size="large" fullscreen tip="Fetching statistics and product distribution for the admin overview." />;
+    return <Spin size="large" fullscreen description="Fetching statistics and product distribution for the admin overview." />;
   }
 
   if (error && !stats) {

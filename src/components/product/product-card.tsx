@@ -53,7 +53,7 @@ export function ProductCard({ product, onViewDetails, onAddToCart }: ProductCard
           <div className="flex gap-2">
             {onViewDetails ? (
               <Button onClick={() => onViewDetails(product)}>
-                Details
+                Detail
               </Button>
             ) : null}
             <Button type="primary" onClick={() => onAddToCart(product)}>

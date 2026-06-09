@@ -1,5 +1,6 @@
 using System.Text;
 using Backend.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,9 +21,14 @@ var jwtSection = builder.Configuration.GetSection("Jwt");
 var issuer = jwtSection["Issuer"] ?? "PortfolioAdmin";
 var audience = jwtSection["Audience"] ?? "PortfolioAdminClient";
 var key = jwtSection["Key"] ?? throw new InvalidOperationException("JWT signing key is missing.");
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
+var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
 
 builder.Services
   .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddCookie("External")
   .AddJwtBearer(options =>
   {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -54,6 +60,34 @@ builder.Services
       }
     };
   });
+
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+  builder.Services.AddAuthentication()
+    .AddGoogle("Google", options =>
+    {
+      options.SignInScheme = "External";
+      options.ClientId = googleClientId;
+      options.ClientSecret = googleClientSecret;
+      options.CallbackPath = "/signin-google";
+      options.SaveTokens = true;
+    });
+}
+
+if (!string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret))
+{
+  builder.Services.AddAuthentication()
+    .AddFacebook("Facebook", options =>
+    {
+      options.SignInScheme = "External";
+      options.AppId = facebookAppId;
+      options.AppSecret = facebookAppSecret;
+      options.CallbackPath = "/signin-facebook";
+      options.SaveTokens = true;
+      options.Fields.Add("name");
+      options.Fields.Add("email");
+    });
+}
 
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
@@ -101,10 +135,13 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
-app.UseSwaggerUI();
+  app.UseSwaggerUI();
+}
+else
+{
+  app.UseHttpsRedirection();
 }
 app.UseRouting();
-app.UseHttpsRedirection();
 app.UseCors(app.Environment.IsDevelopment() ? "LocalFrontend" : "AllowVercel");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -13,7 +13,7 @@ interface ProductFiltersProps {
 export function ProductFilters({ search, selectedCategory, onSearchChange, onCategoryChange }: ProductFiltersProps) {
   return (
     <Card bordered={false} style={{ marginBottom: 32, boxShadow: '0 12px 30px rgba(15, 23, 42, 0.06)' }}>
-      <Space direction="vertical" size={16} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={16} style={{ width: '100%' }}>
         <div>
           <Typography.Title level={4} style={{ margin: 0 }}>
             Refine products

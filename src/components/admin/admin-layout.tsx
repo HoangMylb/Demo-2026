@@ -1,31 +1,41 @@
-import { AppstoreOutlined, BarChartOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, LogoutOutlined, MenuOutlined, MessageOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Dropdown, Grid, Layout, Menu, Space, Tag, theme, Typography } from 'antd';
-import { useMemo, type PropsWithChildren } from 'react';
+import { useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import { AdminFooter } from './admin-footer';
+import { ThemeToggle } from '../layout/theme-toggle';
 
 const { Header, Content, Sider } = Layout;
 
-export type AdminView = 'dashboard' | 'products' | 'users';
+export type AdminView = 'dashboard' | 'products' | 'users' | 'reviews';
 
 interface AdminLayoutProps extends PropsWithChildren {
   activeView: AdminView;
   onNavigate: (view: AdminView) => void;
-  onExit: () => void;
+  onLogout: () => void;
   onOpenSettings: () => void;
   sessionRole: string | null;
   sessionEmail: string | null;
 }
 
-export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, sessionRole, sessionEmail, children }: AdminLayoutProps) {
+export function AdminLayout({ activeView, onNavigate, onLogout, onOpenSettings, sessionRole, sessionEmail, children }: AdminLayoutProps) {
   const { token } = theme.useToken();
   const screens = Grid.useBreakpoint();
   const isDesktop = Boolean(screens.lg);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (isDesktop) {
+      setMobileNavOpen(false);
+    }
+  }, [isDesktop]);
 
   const menuItems = useMemo(
-    () => [
-      { key: 'dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
-      { key: 'products', icon: <ShopOutlined />, label: 'Products' },
-      { key: 'users', icon: <TeamOutlined />, label: 'Users' },
-    ],
+      () => [
+        { key: 'dashboard', icon: <AppstoreOutlined />, label: 'Dashboard' },
+        { key: 'products', icon: <ShopOutlined />, label: 'Products' },
+        { key: 'users', icon: <TeamOutlined />, label: 'Users' },
+        { key: 'reviews', icon: <MessageOutlined />, label: 'Reviews' },
+      ],
     [],
   );
 
@@ -33,15 +43,15 @@ export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, se
     <Layout style={{ minHeight: '100vh', background: 'transparent' }}>
       <Sider
         breakpoint="lg"
-        collapsedWidth={isDesktop ? 80 : 0}
+        collapsedWidth={80}
         width={260}
-        style={{ background: 'transparent' }}
+        style={{ background: 'transparent', paddingLeft: isDesktop ? 24 : 0, display: isDesktop ? 'block' : 'none' }}
       >
         <div
             style={{
               position: 'sticky',
               top: 24,
-              marginRight: 24,
+              marginRight: isDesktop ? 24 : 0,
               borderRadius: token.borderRadiusLG,
               background: 'var(--color-bg-surface)',
               border: `1px solid var(--color-border-soft)`,
@@ -49,49 +59,22 @@ export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, se
               boxShadow: token.boxShadowTertiary,
             }}
         >
-          <Space direction="vertical" size={4} style={{ marginBottom: 20 }}>
-            <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: 12 }}>
-              Admin panel
-            </Typography.Text>
-            <Typography.Title level={4} style={{ margin: 0 }}>
-              Operations workspace
-            </Typography.Title>
-            <Typography.Paragraph type="secondary" style={{ margin: 0, fontSize: 13 }}>
-              A clean enterprise-style workspace that communicates maintainability and delivery speed.
-            </Typography.Paragraph>
-          </Space>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: 12,
-              alignItems: 'flex-start',
-              marginBottom: 20,
-              padding: 16,
-              borderRadius: token.borderRadiusLG,
-              background: 'var(--color-brand-50)',
-            }}
-          >
-            <BarChartOutlined style={{ color: 'var(--color-brand-600)', fontSize: 18, marginTop: 2 }} />
-            <div>
-              <Typography.Text strong>Admin APIs</Typography.Text>
-              <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0', fontSize: 13 }}>
-                Standardized CRUD screens built for fast delivery and easier client handoff.
-              </Typography.Paragraph>
-            </div>
-          </div>
+          <Typography.Title level={4} style={{ margin: '0 0 20px' }}>
+            Admin Panel
+          </Typography.Title>
 
           <Menu
             mode="inline"
             selectedKeys={[activeView]}
             items={menuItems}
-            onClick={(event) => onNavigate(event.key as AdminView)}
+            onClick={(event) => {
+              onNavigate(event.key as AdminView);
+              if (!isDesktop) {
+                setMobileNavOpen(false);
+              }
+            }}
             style={{ borderInlineEnd: 'none' }}
           />
-
-          <Button block style={{ marginTop: 20 }} onClick={onExit}>
-            Back to storefront
-          </Button>
         </div>
       </Sider>
 
@@ -99,8 +82,13 @@ export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, se
         <Header
           style={{
             background: 'transparent',
-            padding: '24px 0 0',
+            padding: isDesktop ? '24px 24px 0 24px' : '16px 16px 0 16px',
             height: 'auto',
+            position: isDesktop ? 'static' : 'sticky',
+            top: isDesktop ? 'auto' : 0,
+            left: 0,
+            right: 0,
+            zIndex: isDesktop ? 'auto' : 30,
           }}
         >
           <div
@@ -109,56 +97,90 @@ export function AdminLayout({ activeView, onNavigate, onExit, onOpenSettings, se
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 16,
-              padding: isDesktop ? '20px 24px' : '16px',
+              padding: isDesktop ? '18px 22px' : '14px 16px',
               borderRadius: token.borderRadiusLG,
               background: 'var(--color-bg-surface)',
               border: `1px solid var(--color-border-soft)`,
-              boxShadow: token.boxShadowTertiary,
             }}
           >
-            <div>
-              <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.18em', fontSize: 12 }}>
-                Control center
-              </Typography.Text>
-              <Typography.Title level={isDesktop ? 2 : 3} style={{ margin: '6px 0 0' }}>
+            <Space size={12} align="center">
+              {!isDesktop ? (
+                <Button type="text" icon={<MenuOutlined />} onClick={() => setMobileNavOpen((current) => !current)} aria-label="Open admin navigation" />
+              ) : null}
+              <div>
+              <Typography.Title level={isDesktop ? 3 : 4} style={{ margin: 0 }}>
                 Admin Panel
               </Typography.Title>
-              <Typography.Paragraph type="secondary" style={{ margin: '6px 0 0' }}>
-                Standardized admin flows using familiar UI patterns for faster delivery and easier client handoff.
-              </Typography.Paragraph>
-            </div>
+              </div>
+            </Space>
 
-            <Dropdown
-              menu={{
-                items: [
-                  { key: 'email', label: sessionEmail ?? 'No email available', disabled: true },
-                  { key: 'role', label: sessionRole ?? 'Unknown role', disabled: true },
-                  { type: 'divider' },
-                  { key: 'settings', icon: <SettingOutlined />, label: 'Settings', onClick: onOpenSettings },
-                  { key: 'logout', label: 'Logout', onClick: onExit },
-                ],
-              }}
-              trigger={['click']}
-              overlayClassName="admin-account-dropdown"
-            >
-              <Button type="text" style={{ height: 'auto', padding: 0 }}>
-                <Space>
-                  <Avatar icon={<UserOutlined />} />
-                  {isDesktop ? (
-                    <Space direction="vertical" size={0}>
-                      <Typography.Text strong>Admin workspace</Typography.Text>
-                      <Tag color="blue" style={{ marginInlineEnd: 0, width: 'fit-content' }}>
-                        {sessionRole ?? 'Unknown role'}
+            <Space size={12} align="center">
+              <ThemeToggle />
+
+              <Dropdown
+                menu={{
+                  items: [
+                    { key: 'settings', icon: <SettingOutlined />, label: 'Settings', onClick: onOpenSettings },
+                    { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', onClick: onLogout },
+                  ],
+                }}
+                trigger={['click']}
+                classNames={{ root: 'admin-account-dropdown' }}
+              >
+                <Button
+                  type="text"
+                  className="admin-identity-trigger"
+                  style={{
+                    height: 'auto',
+                    padding: isDesktop ? '10px 14px' : '10px 12px',
+                    borderRadius: token.borderRadiusLG,
+                    border: `1px solid var(--color-border-soft)`,
+                    background: 'var(--color-bg-surface)',
+                  }}
+                >
+                  <Space size={10} align="center">
+                    <Avatar
+                      size={44}
+                      icon={<UserOutlined />}
+                      style={{ background: 'var(--color-brand-600)', color: '#ffffff', flexShrink: 0 }}
+                    />
+                    {isDesktop ? (
+                      <Tag className="admin-tag admin-tag--role" bordered={false} style={{ marginInlineEnd: 0, width: 'fit-content' }}>
+                          {sessionRole ?? 'Unknown role'}
                       </Tag>
-                    </Space>
-                  ) : null}
-                </Space>
-              </Button>
-            </Dropdown>
+                    ) : null}
+                  </Space>
+                </Button>
+              </Dropdown>
+            </Space>
           </div>
+
+          {!isDesktop && mobileNavOpen ? (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: token.borderRadiusLG,
+                background: 'var(--color-bg-surface)',
+                border: `1px solid var(--color-border-soft)`,
+              }}
+            >
+              <Menu
+                mode="inline"
+                selectedKeys={[activeView]}
+                items={menuItems}
+                onClick={(event) => {
+                  onNavigate(event.key as AdminView);
+                  setMobileNavOpen(false);
+                }}
+                style={{ borderInlineEnd: 'none' }}
+              />
+            </div>
+          ) : null}
         </Header>
 
-        <Content style={{ padding: '24px 0' }}>{children}</Content>
+        <Content style={{ padding: isDesktop ? '24px 24px 32px' : '16px 16px 24px', marginTop: isDesktop ? 0 : 8 }}>{children}</Content>
+        <AdminFooter />
       </Layout>
     </Layout>
   );

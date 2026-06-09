@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Button, Result, Spin } from 'antd';
-import { deleteAdminUser, getAdminUsers, getCurrentSession, updateAdminUserAccess } from '../lib/admin-api';
+import { createAdminUser, deleteAdminUser, getAdminUsers, getCurrentSession, updateAdminUserAccess } from '../lib/admin-api';
 import { AdminUsersPage } from './admin-users-page';
-import type { AdminSession, AdminUser } from '../types/admin';
+import type { AdminSession, AdminUser, CreateAdminUserPayload } from '../types/admin';
 
 export function AdminUsersRoute() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [busyUserId, setBusyUserId] = useState<number | null>(null);
+  const [creatingUser, setCreatingUser] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,8 +83,20 @@ export function AdminUsersRoute() {
     }
   };
 
+  const handleCreateUser = async (payload: CreateAdminUserPayload): Promise<{ message: string }> => {
+    setCreatingUser(true);
+
+    try {
+      const result = await createAdminUser(payload);
+      await refreshUsers();
+      return { message: result.message };
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
   if (loading && users.length === 0) {
-    return <Spin size="large" fullscreen tip="Fetching user accounts and access states for the admin table." />;
+    return <Spin size="large" fullscreen description="Fetching user accounts and access states for the admin table." />;
   }
 
   if (error && users.length === 0) {
@@ -101,5 +114,17 @@ export function AdminUsersRoute() {
     );
   }
 
-  return <AdminUsersPage session={session} users={users} busyUserId={busyUserId} onUpdateUser={handleUpdateUser} onToggleLock={handleToggleLock} onToggleApproval={handleToggleApproval} onDeleteUser={handleDeleteUser} />;
+  return (
+    <AdminUsersPage
+      session={session}
+      users={users}
+      busyUserId={busyUserId}
+      creatingUser={creatingUser}
+      onCreateUser={handleCreateUser}
+      onUpdateUser={handleUpdateUser}
+      onToggleLock={handleToggleLock}
+      onToggleApproval={handleToggleApproval}
+      onDeleteUser={handleDeleteUser}
+    />
+  );
 }

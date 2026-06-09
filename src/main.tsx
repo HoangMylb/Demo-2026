@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           colorBorder: 'var(--color-border-soft)',
           colorBgContainer: 'var(--color-bg-surface)',
           colorBgElevated: 'var(--color-bg-surface)',
-          colorTextLightSolid: 'var(--color-text-primary)',
+          colorTextLightSolid: '#ffffff',
           borderRadius: 16,
           fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         },
@@ -93,6 +93,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             defaultHoverBg: 'var(--color-bg-surface-soft)',
             defaultHoverColor: 'var(--color-text-primary)',
             defaultHoverBorderColor: 'var(--color-border-strong)',
+            primaryColor: '#ffffff',
+            dangerColor: '#ffffff',
+            colorPrimaryHover: 'var(--color-brand-700)',
+            colorPrimaryActive: 'var(--color-brand-700)',
+          },
+          Popconfirm: {
+            colorText: 'var(--color-text-primary)',
+          },
+          Tag: {
+            defaultColor: 'var(--color-text-primary)',
+            defaultBg: 'var(--color-bg-surface-soft)',
           },
           Drawer: {
             colorBgElevated: 'var(--color-bg-surface)',
@@ -103,7 +114,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       }}
     >
       <AntApp>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <App />
         </BrowserRouter>
       </AntApp>

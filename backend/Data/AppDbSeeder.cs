@@ -24,39 +24,85 @@ public static class AppDbSeeder
 
     var categoriesByName = await context.Categories.ToDictionaryAsync(category => category.Name);
 
-    if (!await context.Products.AnyAsync())
+    var desiredProducts = new[]
     {
-      var products = new[]
+      new Product
       {
-        new Product
-        {
-          Name = "Luma Air Headphones",
-          Description = "Adaptive noise canceling headphones with spatial audio tuning.",
-          Price = 249,
-          ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80",
-          CategoryId = categoriesByName["Audio"].Id
-        },
-        new Product
-        {
-          Name = "Pulse Smartwatch",
-          Description = "Health tracking and all-day battery life in one minimalist shell.",
-          Price = 189,
-          ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30e?auto=format&fit=crop&w=900&q=80",
-          CategoryId = categoriesByName["Wearables"].Id
-        },
-        new Product
-        {
-          Name = "Arc Desk Lamp",
-          Description = "A dimmable lamp with warm-to-cool presets for deep work.",
-          Price = 129,
-          ImageUrl = "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=900&q=80",
-          CategoryId = categoriesByName["Workspace"].Id
-        }
-      };
+        Name = "Luma Air Headphones",
+        Description = "Adaptive noise canceling headphones with spatial audio tuning.",
+        Price = 249,
+        ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Audio"].Id
+      },
+      new Product
+      {
+        Name = "Pulse Smartwatch",
+        Description = "Health tracking and all-day battery life in one minimalist shell.",
+        Price = 189,
+        ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30e?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Wearables"].Id
+      },
+      new Product
+      {
+        Name = "Arc Desk Lamp",
+        Description = "A dimmable lamp with warm-to-cool presets for deep work.",
+        Price = 129,
+        ImageUrl = "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Workspace"].Id
+      },
+      new Product
+      {
+        Name = "Studio Monitor Earbuds",
+        Description = "Compact wireless earbuds tuned for crisp vocals and commute-ready ANC.",
+        Price = 149,
+        ImageUrl = "https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Audio"].Id
+      },
+      new Product
+      {
+        Name = "Orbit Fitness Band",
+        Description = "A lightweight band with sleep tracking, step goals, and all-week comfort.",
+        Price = 99,
+        ImageUrl = "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Wearables"].Id
+      },
+      new Product
+      {
+        Name = "Flow Mechanical Keyboard",
+        Description = "Tactile switches, quiet stabilizers, and a compact layout built for focused work.",
+        Price = 159,
+        ImageUrl = "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Workspace"].Id
+      },
+      new Product
+      {
+        Name = "Core Carry Sleeve",
+        Description = "A structured everyday sleeve with soft lining for tablets, notes, and cables.",
+        Price = 69,
+        ImageUrl = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=900&q=80",
+        CategoryId = categoriesByName["Accessories"].Id
+      }
+    };
 
-      await context.Products.AddRangeAsync(products);
-      await context.SaveChangesAsync();
+    var existingProducts = await context.Products.ToListAsync();
+
+    foreach (var desiredProduct in desiredProducts)
+    {
+      var existingProduct = existingProducts.FirstOrDefault(product => product.Name == desiredProduct.Name);
+      if (existingProduct is null)
+      {
+        await context.Products.AddAsync(desiredProduct);
+        continue;
+      }
+
+      existingProduct.Description = desiredProduct.Description;
+      existingProduct.Price = desiredProduct.Price;
+      existingProduct.ImageUrl = desiredProduct.ImageUrl;
+      existingProduct.CategoryId = desiredProduct.CategoryId;
+      existingProduct.UpdatedAtUtc = DateTime.UtcNow;
     }
+
+    await context.SaveChangesAsync();
 
     var desiredUsers = new[]
     {
@@ -112,5 +158,109 @@ public static class AppDbSeeder
     }
 
     await context.SaveChangesAsync();
+
+    var productIdsByName = await context.Products.ToDictionaryAsync(product => product.Name, product => product.Id);
+    var userIdsByEmail = await context.Users.ToDictionaryAsync(user => user.Email.ToLower(), user => user.Id);
+
+    if (!await context.ProductReviews.AnyAsync())
+    {
+      var reviews = new[]
+      {
+        new ProductReview
+        {
+          ProductId = productIdsByName["Luma Air Headphones"],
+          UserId = userIdsByEmail["user@gmail.com"],
+          CustomerName = "Nguyen Minh Anh",
+          Rating = 5,
+          Comment = "Âm thanh rất sạch, đeo lâu vẫn êm tai và chống ồn đủ tốt để làm việc ở quán cà phê.",
+          VariantType = "Wireless",
+          Color = "Midnight Blue",
+          Size = "Standard",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-42),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-35),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Luma Air Headphones"],
+          UserId = userIdsByEmail["admin@gmail.com"],
+          CustomerName = "Tran Gia Bao",
+          Rating = 4,
+          Comment = "Pin ổn, bass chắc, đàm thoại rõ. Mình thích nhất là đeo khá gọn và không bị nóng tai.",
+          VariantType = "Wireless",
+          Color = "Silver Mist",
+          Size = "Standard",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-21),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-18),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Pulse Smartwatch"],
+          UserId = userIdsByEmail["locked@luma.dev"],
+          CustomerName = "Le Thu Ha",
+          Rating = 5,
+          Comment = "Theo dõi giấc ngủ khá chính xác, dây mềm, thông báo rung vừa đủ và thiết kế nhìn rất gọn.",
+          VariantType = "Sport Edition",
+          Color = "Graphite Black",
+          Size = "42mm",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-29),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-24),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Pulse Smartwatch"],
+          UserId = userIdsByEmail["user@gmail.com"],
+          CustomerName = "Pham Quoc Viet",
+          Rating = 4,
+          Comment = "Màn hình sáng đẹp, tracking ổn định. Nếu thêm nhiều mặt đồng hồ hơn nữa thì sẽ hoàn hảo.",
+          VariantType = "Everyday Edition",
+          Color = "Sand Beige",
+          Size = "44mm",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-14),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-11),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Arc Desk Lamp"],
+          UserId = userIdsByEmail["admin@gmail.com"],
+          CustomerName = "Hoang Linh Chi",
+          Rating = 5,
+          Comment = "Ánh sáng dịu, xoay góc linh hoạt và rất hợp setup bàn làm việc tối giản.",
+          VariantType = "Desk Setup",
+          Color = "Warm White",
+          Size = "Medium",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-33),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-27),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Flow Mechanical Keyboard"],
+          UserId = userIdsByEmail["user@gmail.com"],
+          CustomerName = "Doan Tuan Kiet",
+          Rating = 5,
+          Comment = "Gõ rất sướng tay, stabilizer chắc và âm thanh khá trầm. Dùng code cả ngày vẫn thích.",
+          VariantType = "Tactile Switch",
+          Color = "Charcoal",
+          Size = "75%",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-19),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-13),
+        },
+        new ProductReview
+        {
+          ProductId = productIdsByName["Core Carry Sleeve"],
+          UserId = userIdsByEmail["locked@luma.dev"],
+          CustomerName = "Bui Khanh Vy",
+          Rating = 4,
+          Comment = "Chất liệu đẹp, form cứng cáp, đựng vừa tablet với phụ kiện cơ bản rất gọn.",
+          VariantType = "Travel Sleeve",
+          Color = "Olive Grey",
+          Size = "11-inch",
+          PurchasedAtUtc = DateTime.UtcNow.AddDays(-10),
+          CreatedAtUtc = DateTime.UtcNow.AddDays(-7),
+        },
+      };
+
+      await context.ProductReviews.AddRangeAsync(reviews);
+      await context.SaveChangesAsync();
+    }
   }
 }

@@ -15,27 +15,37 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
 {
   private readonly AppDbContext _context = context;
 
+  private static ProductListItemDto MapProductListItemDto(Product product)
+  {
+    var reviewCount = product.Reviews.Count;
+    var averageRating = reviewCount == 0 ? 0m : Math.Round((decimal)product.Reviews.Average(review => review.Rating), 1);
+
+    return new ProductListItemDto(
+      product.Id,
+      product.Name,
+      product.Description,
+      product.Price,
+      product.ImageUrl,
+      product.CategoryId,
+      product.Category?.Name ?? string.Empty,
+      averageRating,
+      reviewCount,
+      product.CreatedAtUtc,
+      product.UpdatedAtUtc
+    );
+  }
+
   [HttpGet]
   public async Task<ActionResult<IEnumerable<ProductListItemDto>>> GetProducts()
   {
     var products = await _context.Products
       .AsNoTracking()
       .Include(product => product.Category)
+      .Include(product => product.Reviews)
       .OrderByDescending(product => product.CreatedAtUtc)
-      .Select(product => new ProductListItemDto(
-        product.Id,
-        product.Name,
-        product.Description,
-        product.Price,
-        product.ImageUrl,
-        product.CategoryId,
-        product.Category != null ? product.Category.Name : string.Empty,
-        product.CreatedAtUtc,
-        product.UpdatedAtUtc
-      ))
       .ToListAsync();
 
-    return this.ApiOk(products);
+    return this.ApiOk(products.Select(MapProductListItemDto).ToList());
   }
 
   [HttpGet("{id:int}")]
@@ -44,21 +54,12 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var product = await _context.Products
       .AsNoTracking()
       .Include(item => item.Category)
+      .Include(item => item.Reviews)
       .Where(item => item.Id == id)
-      .Select(item => new ProductListItemDto(
-        item.Id,
-        item.Name,
-        item.Description,
-        item.Price,
-        item.ImageUrl,
-        item.CategoryId,
-        item.Category != null ? item.Category.Name : string.Empty,
-        item.CreatedAtUtc,
-        item.UpdatedAtUtc
-      ))
+      .Select(item => item)
       .FirstOrDefaultAsync();
 
-    return product is null ? this.ApiNotFound("The requested product was not found.") : this.ApiOk(product);
+    return product is null ? this.ApiNotFound("The requested product was not found.") : this.ApiOk(MapProductListItemDto(product));
   }
 
   [HttpPost]
@@ -87,21 +88,12 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var createdProduct = await _context.Products
       .AsNoTracking()
       .Include(item => item.Category)
+      .Include(item => item.Reviews)
       .Where(item => item.Id == product.Id)
-      .Select(item => new ProductListItemDto(
-        item.Id,
-        item.Name,
-        item.Description,
-        item.Price,
-        item.ImageUrl,
-        item.CategoryId,
-        item.Category != null ? item.Category.Name : string.Empty,
-        item.CreatedAtUtc,
-        item.UpdatedAtUtc
-      ))
+      .Select(item => item)
       .FirstAsync();
 
-    return this.ApiCreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+    return this.ApiCreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, MapProductListItemDto(createdProduct));
   }
 
   [HttpPut("{id:int}")]
@@ -131,21 +123,12 @@ public class AdminProductsController(AppDbContext context) : ControllerBase
     var updatedProduct = await _context.Products
       .AsNoTracking()
       .Include(item => item.Category)
+      .Include(item => item.Reviews)
       .Where(item => item.Id == id)
-      .Select(item => new ProductListItemDto(
-        item.Id,
-        item.Name,
-        item.Description,
-        item.Price,
-        item.ImageUrl,
-        item.CategoryId,
-        item.Category != null ? item.Category.Name : string.Empty,
-        item.CreatedAtUtc,
-        item.UpdatedAtUtc
-      ))
+      .Select(item => item)
       .FirstAsync();
 
-    return this.ApiOk(updatedProduct);
+    return this.ApiOk(MapProductListItemDto(updatedProduct));
   }
 
   [HttpDelete("{id:int}")]

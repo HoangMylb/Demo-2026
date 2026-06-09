@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, LockOutlined, MailOutlined, SaveOutlined, SafetyOutlined, UserOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Row, Space, Spin, Tag, Typography } from 'antd';
+import { Alert, App, Button, Card, Col, Form, Input, Row, Space, Spin, Tag, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getProfile, updateProfile } from '../lib/admin-api';
@@ -10,6 +10,7 @@ interface SettingsPageProps {
 }
 
 export function SettingsPage({ session }: SettingsPageProps) {
+  const { message } = App.useApp();
   const [form] = Form.useForm<{ fullName: string; userName: string; email: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,17 +47,11 @@ export function SettingsPage({ session }: SettingsPageProps) {
   }
 
   return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={24} style={{ width: '100%' }}>
       <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-        <Typography.Text type="secondary" style={{ textTransform: 'uppercase', letterSpacing: '0.18em', fontSize: 12 }}>
-          Settings
-        </Typography.Text>
-        <Typography.Title level={2} style={{ marginTop: 8, marginBottom: 8 }}>
+        <Typography.Title level={2} style={{ margin: 0 }}>
           Update profile
         </Typography.Title>
-        <Typography.Paragraph type="secondary" style={{ marginBottom: 0 }}>
-          Keep your profile current using the same enterprise-style patterns as the admin workspace.
-        </Typography.Paragraph>
       </Card>
 
       <Spin spinning={loading}>
@@ -78,8 +73,10 @@ export function SettingsPage({ session }: SettingsPageProps) {
                       userName: result.data.userName,
                       email: result.data.email,
                     });
+                    message.success(result.message);
                   } catch (submitError) {
                     setError(submitError instanceof Error ? submitError.message : 'Unable to update profile.');
+                    message.error(submitError instanceof Error ? submitError.message : 'Unable to update profile.');
                   } finally {
                     setSaving(false);
                   }
@@ -102,7 +99,7 @@ export function SettingsPage({ session }: SettingsPageProps) {
                   <Input prefix={<MailOutlined />} size="large" />
                 </Form.Item>
 
-                {error ? <Alert type="error" showIcon message={error} style={{ marginBottom: 16 }} /> : null}
+                {error ? <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} /> : null}
 
                 <Button type="primary" htmlType="submit" loading={saving} icon={<SaveOutlined />}>
                   Save profile
@@ -112,9 +109,9 @@ export function SettingsPage({ session }: SettingsPageProps) {
           </Col>
 
           <Col xs={24} lg={8}>
-            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Space orientation="vertical" size={16} style={{ width: '100%' }}>
               <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-                <Space direction="vertical" size={10}>
+            <Space orientation="vertical" size={10}>
                   <Tag icon={<SafetyOutlined />} color="blue">Role</Tag>
                   <Typography.Title level={4} style={{ margin: 0 }}>
                     {profile?.role ?? session.role ?? 'Unknown'}
@@ -123,7 +120,7 @@ export function SettingsPage({ session }: SettingsPageProps) {
               </Card>
 
               <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-                <Space direction="vertical" size={10}>
+            <Space orientation="vertical" size={10}>
                   <Tag icon={<CheckCircleOutlined />} color={profile?.isApproved ? 'green' : 'gold'}>
                     Approval
                   </Tag>
@@ -134,7 +131,7 @@ export function SettingsPage({ session }: SettingsPageProps) {
               </Card>
 
               <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-                <Space direction="vertical" size={10}>
+            <Space orientation="vertical" size={10}>
                   <Tag icon={<LockOutlined />} color={profile?.isLocked ? 'red' : 'blue'}>
                     Status
                   </Tag>

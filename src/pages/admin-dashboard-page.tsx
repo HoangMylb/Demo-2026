@@ -26,7 +26,7 @@ export function AdminDashboardPage({ stats, products, loading, error }: AdminDas
   );
 
   return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+    <Space orientation="vertical" size={24} style={{ width: '100%' }}>
       <div>
         <Typography.Title level={3} style={{ margin: 0 }}>
           Dashboard overview

@@ -1,4 +1,4 @@
-import { MenuOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons';
+import { LoginOutlined, LogoutOutlined, MenuOutlined, SettingOutlined, ShoppingCartOutlined, UserAddOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Button, Drawer, Dropdown, Layout, Menu, Space, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import type { MenuProps } from 'antd';
@@ -23,23 +23,22 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const isAdmin = session?.role?.toLowerCase() === 'admin';
 
   const navigationItems = useMemo(
-    () => [
+    () => (isAdmin ? [{ key: '/admin', label: 'Dashboard' }] : [
       { key: '/', label: 'Home' },
       { key: '/products', label: 'Products' },
-      ...(isAdmin ? [{ key: '/admin', label: 'Dashboard' }] : []),
-    ],
+    ]),
     [isAdmin],
   );
 
   const accountMenuItems: MenuProps['items'] = isLoggedIn
     ? [
-        { key: 'settings', label: 'Settings', onClick: () => onNavigate('/settings') },
-        { key: 'logout', label: 'Logout', onClick: onLogout },
+        { key: 'settings', icon: <SettingOutlined />, label: 'Settings', onClick: () => onNavigate('/settings') },
+        { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', onClick: onLogout },
       ]
     : [
-        { key: 'login', label: 'Login', onClick: () => onNavigate('/auth?mode=login') },
-        { key: 'register', label: 'Register', onClick: () => onNavigate('/auth?mode=register') },
-        { key: 'admin-login', label: 'Admin login', onClick: () => onNavigate('/admin/login') },
+        { key: 'login', icon: <LoginOutlined />, label: 'Login', onClick: () => onNavigate('/auth?mode=login') },
+        { key: 'register', icon: <UserAddOutlined />, label: 'Register', onClick: () => onNavigate('/auth?mode=register') },
+        { key: 'admin-login', icon: <UserOutlined />, label: 'Admin login', onClick: () => onNavigate('/admin/login') },
       ];
 
   const popupClassName = 'site-account-dropdown';
@@ -92,7 +91,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
             <ThemeToggle />
           </div>
 
-          <Dropdown menu={{ items: accountMenuItems }} trigger={['click']} overlayClassName={popupClassName}>
+          <Dropdown menu={{ items: accountMenuItems }} trigger={['click']} classNames={{ root: popupClassName }}>
             <Button type="text" icon={<Avatar size="small" icon={<UserOutlined />} style={{ background: 'var(--color-bg-surface-soft)', color: 'var(--color-text-primary)' }} />} />
           </Dropdown>
 
@@ -107,7 +106,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
       </div>
 
       <Drawer placement="left" open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} title="Navigation">
-        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
           <ThemeToggle />
           <Menu
             mode="inline"

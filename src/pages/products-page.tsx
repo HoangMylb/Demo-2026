@@ -43,11 +43,8 @@ export function ProductsPage({ products, onViewDetails, onAddToCart }: ProductsP
   return (
     <section>
       <div className="mb-8">
-        <p className="text-sm font-medium uppercase tracking-[0.28em]" style={{ color: 'var(--color-brand-600)' }}>
-          Product catalog
-        </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
-          Browse a responsive, filterable shopping experience
+          Products
         </h2>
       </div>
 
@@ -72,9 +69,6 @@ export function ProductsPage({ products, onViewDetails, onAddToCart }: ProductsP
           <h3 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             No products found
           </h3>
-          <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Try a broader search or switch to another category.
-          </p>
         </div>
       ) : null}
 

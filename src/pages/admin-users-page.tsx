@@ -1,24 +1,31 @@
-import { DeleteOutlined, EditOutlined, LockOutlined, SafetyOutlined, UnlockOutlined } from '@ant-design/icons';
-import { App, Button, Card, Divider, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, LockOutlined, PlusOutlined, SafetyOutlined, UnlockOutlined, UserOutlined } from '@ant-design/icons';
+import { App, Button, Card, Divider, Dropdown, Input, Form, Modal, Popconfirm, Select, Space, Table, Tag, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import type { AdminSession, AdminUser } from '../types/admin';
+import type { AdminSession, AdminUser, CreateAdminUserPayload } from '../types/admin';
 
 interface AdminUsersPageProps {
   session: AdminSession | null;
   users: AdminUser[];
   busyUserId: number | null;
+  creatingUser: boolean;
+  onCreateUser: (payload: CreateAdminUserPayload) => Promise<{ message: string }>;
   onUpdateUser: (user: AdminUser, payload: { fullName: string; userName: string; email: string; role: 'Admin' | 'User' }) => Promise<{ message: string }>;
   onToggleLock: (user: AdminUser) => Promise<{ message: string }>;
   onToggleApproval: (user: AdminUser) => Promise<{ message: string }>;
   onDeleteUser: (user: AdminUser) => Promise<{ message: string }>;
 }
 
-export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onToggleLock, onToggleApproval, onDeleteUser }: AdminUsersPageProps) {
+export function AdminUsersPage({ session, users, busyUserId, creatingUser, onCreateUser, onUpdateUser, onToggleLock, onToggleApproval, onDeleteUser }: AdminUsersPageProps) {
   const { message } = App.useApp();
   const [form] = Form.useForm<{ fullName: string; userName: string; email: string; role: 'Admin' | 'User' }>();
+  const [createForm] = Form.useForm<CreateAdminUserPayload>();
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [nameFilter, setNameFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'Admin' | 'User'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Locked'>('all');
 
   useEffect(() => {
     if (!editingUser) {
@@ -33,12 +40,43 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
     });
   }, [editingUser, form]);
 
+  useEffect(() => {
+    if (!createOpen) {
+      return;
+    }
+
+    createForm.setFieldsValue({
+      fullName: '',
+      userName: '',
+      email: '',
+      password: '',
+      role: 'User',
+    });
+  }, [createForm, createOpen]);
+
+  const filteredUsers = useMemo(() => {
+    const query = nameFilter.trim().toLowerCase();
+
+    return users.filter((user) => {
+      const matchesName =
+        !query ||
+        user.fullName.toLowerCase().includes(query) ||
+        user.userName.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query);
+      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+      const derivedStatus = user.isLocked ? 'Locked' : 'Active';
+      const matchesStatus = statusFilter === 'all' || derivedStatus === statusFilter;
+
+      return matchesName && matchesRole && matchesStatus;
+    });
+  }, [nameFilter, roleFilter, statusFilter, users]);
+
   const columns: ColumnsType<AdminUser> = [
     {
       title: 'User',
       key: 'user',
       render: (_, user) => (
-        <Space direction="vertical" size={2}>
+          <Space orientation="vertical" size={2}>
           <Typography.Text strong>{user.fullName}</Typography.Text>
           <Typography.Text type="secondary">{user.email}</Typography.Text>
         </Space>
@@ -53,7 +91,11 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
-      render: (value: string) => <Tag color={value === 'Admin' ? 'purple' : 'default'}>{value}</Tag>,
+      render: (value: string) => (
+        <Tag className={value === 'Admin' ? 'admin-tag admin-tag--admin' : 'admin-tag admin-tag--user'} bordered={false}>
+          {value}
+        </Tag>
+      ),
     },
     {
       title: 'Approval',
@@ -78,20 +120,6 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
             <Button icon={<EditOutlined />} disabled={isBusy} onClick={() => setEditingUser(user)}>
               Edit
             </Button>
-            <Button icon={user.isLocked ? <UnlockOutlined /> : <LockOutlined />} disabled={isBusy} onClick={() => {
-              void onToggleLock(user)
-                .then((result) => message.success(result.message))
-                .catch((error) => message.error(error instanceof Error ? error.message : 'Unable to update this user right now.'));
-            }}>
-              {user.isLocked ? 'Unlock' : 'Lock'}
-            </Button>
-            <Button icon={<SafetyOutlined />} disabled={isBusy} onClick={() => {
-              void onToggleApproval(user)
-                .then((result) => message.success(result.message))
-                .catch((error) => message.error(error instanceof Error ? error.message : 'Unable to update this user right now.'));
-            }}>
-              {user.isApproved ? 'Revoke approval' : 'Approve'}
-            </Button>
             <Popconfirm
               title="Delete user"
               description={`Delete ${user.fullName} and permanently remove the account.`}
@@ -110,6 +138,35 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
                 Delete
               </Button>
             </Popconfirm>
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 'toggle-lock',
+                    icon: user.isLocked ? <UnlockOutlined /> : <LockOutlined />,
+                    label: user.isLocked ? 'Unlock' : 'Lock',
+                    onClick: () => {
+                      void onToggleLock(user)
+                        .then((result) => message.success(result.message))
+                        .catch((error) => message.error(error instanceof Error ? error.message : 'Unable to update this user right now.'));
+                    },
+                  },
+                  {
+                    key: 'toggle-approval',
+                    icon: <SafetyOutlined />,
+                    label: user.isApproved ? 'Revoke approval' : 'Approve',
+                    onClick: () => {
+                      void onToggleApproval(user)
+                        .then((result) => message.success(result.message))
+                        .catch((error) => message.error(error instanceof Error ? error.message : 'Unable to update this user right now.'));
+                    },
+                  },
+                ],
+              }}
+              trigger={['click']}
+            >
+              <Button icon={<EllipsisOutlined />} aria-label="More user actions" />
+            </Dropdown>
           </Space>
         );
       },
@@ -118,28 +175,120 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
 
   return (
     <>
-      <Space direction="vertical" size={20} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={20} style={{ width: '100%' }}>
         <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
-          <div>
-            <Typography.Title level={3} style={{ margin: 0 }}>
-              User management
-            </Typography.Title>
-            <Typography.Paragraph type="secondary" style={{ margin: '8px 0 0' }}>
-              Familiar access-control actions with clear states and standard enterprise patterns.
-            </Typography.Paragraph>
-          </div>
+          <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
+            <div>
+              <Typography.Title level={3} style={{ margin: 0 }}>
+                User management
+              </Typography.Title>
+            </div>
+
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>
+              Create user
+            </Button>
+          </Space>
         </Card>
 
         <Card bordered={false} style={{ boxShadow: 'var(--shadow-soft)' }}>
+          <Space size={12} wrap style={{ marginBottom: 20, width: '100%' }}>
+            <Input.Search
+              allowClear
+              placeholder="Search users"
+              value={nameFilter}
+              onChange={(event) => setNameFilter(event.target.value)}
+              style={{ flex: '1 1 280px', minWidth: 240 }}
+            />
+            <Select
+              value={roleFilter}
+              style={{ minWidth: 140 }}
+              onChange={setRoleFilter}
+              options={[
+                { value: 'all', label: 'All roles' },
+                { value: 'Admin', label: 'Admin' },
+                { value: 'User', label: 'User' },
+              ]}
+            />
+            <Select
+              value={statusFilter}
+              style={{ minWidth: 140 }}
+              onChange={setStatusFilter}
+              options={[
+                { value: 'all', label: 'All status' },
+                { value: 'Active', label: 'Active' },
+                { value: 'Locked', label: 'Locked' },
+              ]}
+            />
+          </Space>
           <Table<AdminUser>
             rowKey="id"
             columns={columns}
-            dataSource={users}
+            dataSource={filteredUsers}
             pagination={{ pageSize: 6, showSizeChanger: false }}
             scroll={{ x: 1100 }}
           />
         </Card>
       </Space>
+
+      <Modal
+        open={createOpen}
+        title="Create user account"
+        styles={{ body: { paddingTop: 12 } }}
+        onCancel={() => {
+          setCreateOpen(false);
+          createForm.resetFields();
+        }}
+        onOk={() => void createForm.submit()}
+        confirmLoading={creatingUser}
+        okText="Create user"
+        destroyOnClose
+        >
+          <Form
+            form={createForm}
+            layout="vertical"
+          onFinish={async (values) => {
+            try {
+              const normalizedPayload: CreateAdminUserPayload = {
+                ...values,
+                fullName: values.fullName.trim(),
+                userName: values.userName.trim(),
+                email: values.email.trim(),
+                password: values.password.trim(),
+              };
+
+              const result = await onCreateUser(normalizedPayload);
+              message.success(result.message);
+              setCreateOpen(false);
+              createForm.resetFields();
+            } catch (error) {
+              message.error(error instanceof Error ? error.message : 'Unable to create the user right now.');
+            }
+          }}
+        >
+          <Divider style={{ marginTop: 0 }} />
+
+          <Form.Item name="fullName" label="Full name" rules={[{ required: true, message: 'Please enter the full name.' }]}>
+            <Input prefix={<UserOutlined />} placeholder="Avery Morgan" />
+          </Form.Item>
+          <Form.Item name="userName" label="Username" rules={[{ required: true, message: 'Please enter the username.' }]}>
+            <Input placeholder="avery.morgan" />
+          </Form.Item>
+          <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Please enter the email.' }, { type: 'email', message: 'Please enter a valid email.' }]}>
+            <Input placeholder="avery@lumastore.com" />
+          </Form.Item>
+          <Form.Item name="password" label="Password" rules={[{ required: true, message: 'Please enter a password.' }, { min: 6, message: 'Password must be at least 6 characters long.' }]}>
+            <Input.Password placeholder="Create a secure password" />
+          </Form.Item>
+          <Form.Item name="role" label="Role" rules={[{ required: true, message: 'Please select the role.' }]}>
+            <Select
+              options={[
+                { value: 'User', label: 'User' },
+                { value: 'Admin', label: 'Admin' },
+              ]}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Modal
         open={Boolean(editingUser)}
@@ -150,10 +299,10 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
         confirmLoading={saving}
         okText="Save changes"
         destroyOnClose
-      >
-        <Form
-          form={form}
-          layout="vertical"
+        >
+          <Form
+            form={form}
+            layout="vertical"
           onFinish={async (values) => {
             if (!editingUser) {
               return;
@@ -177,10 +326,6 @@ export function AdminUsersPage({ session, users, busyUserId, onUpdateUser, onTog
             }
           }}
         >
-          <Typography.Paragraph type="secondary" style={{ marginTop: 0 }}>
-            Keep this edit flow compact and conventional so another team can extend it without reverse-engineering custom UI behavior.
-          </Typography.Paragraph>
-
           <Divider style={{ marginTop: 0 }} />
 
           <Form.Item name="fullName" label="Full name" rules={[{ required: true, message: 'Please enter the full name.' }]}>

@@ -45,7 +45,9 @@ export SUPABASE_CONNECTION_STRING="Host=db.jisbeenthdzlfvorvwzn.supabase.co;Port
 export SUPABASE_CONNECTION_STRING="Host=aws-1-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.jisbeenthdzlfvorvwzn;Password=YOUR_PASSWORD;SSL Mode=Require;Trust Server Certificate=true"
 ```
 
-The frontend should use `VITE_API_BASE_URL=http://localhost:5000` (or `https://localhost:5001` if you prefer HTTPS locally).
+The frontend should use `VITE_API_BASE_URL=http://localhost:5000` for the simplest local development setup.
+
+In Development, the backend now skips HTTPS redirection so local Vite requests to `http://localhost:5000` do not get turned into browser-level CORS/redirect failures.
 
 ## Deploy / production
 

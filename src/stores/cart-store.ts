@@ -7,7 +7,7 @@ interface CartState {
   isOpen: boolean;
   itemCount: number;
   totalPrice: number;
-  addItem: (product: ProductType) => void;
+  addItem: (product: ProductType, quantity?: number) => void;
   removeItem: (productId: string) => void;
   toggleCart: (value?: boolean) => void;
   clearCart: () => void;
@@ -28,33 +28,30 @@ export const useCartStore = create<CartState>()(
       isOpen: false,
       itemCount: 0,
       totalPrice: 0,
-      addItem: (product) => {
+      addItem: (product, quantity = 1) => {
+        const safeQuantity = Math.max(1, quantity);
         const existingItem = get().items.find((item) => item.id === product.id);
 
         if (existingItem) {
+          const updatedItems = get().items.map((item) =>
+            item.id === product.id ? { ...item, quantity: item.quantity + safeQuantity } : item,
+          );
+
           set((state) => ({
-            items: state.items.map((item) =>
-              item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-            ),
-            itemCount: calculateItemCount(
-              state.items.map((item) =>
-                item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-              ),
-            ),
-            totalPrice: calculateTotalPrice(
-              state.items.map((item) =>
-                item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-              ),
-            ),
+            items: updatedItems,
+            itemCount: calculateItemCount(updatedItems),
+            totalPrice: calculateTotalPrice(updatedItems),
             isOpen: true,
           }));
           return;
         }
 
-        set((state) => ({
-          items: [...state.items, { ...product, quantity: 1 }],
-          itemCount: calculateItemCount([...state.items, { ...product, quantity: 1 }]),
-          totalPrice: calculateTotalPrice([...state.items, { ...product, quantity: 1 }]),
+        const nextItems = [...get().items, { ...product, quantity: safeQuantity }];
+
+        set(() => ({
+          items: nextItems,
+          itemCount: calculateItemCount(nextItems),
+          totalPrice: calculateTotalPrice(nextItems),
           isOpen: true,
         }));
       },
