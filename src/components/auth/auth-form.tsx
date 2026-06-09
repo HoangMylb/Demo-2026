@@ -177,6 +177,16 @@ function LoginForm({ audience, onSuccess }: BaseFormProps) {
 
           {submitError ? <Alert type="error" showIcon title={submitError} /> : null}
 
+          <Alert
+            type="info"
+            showIcon
+            title={
+              audience === 'admin'
+                ? 'Demo admin account: admin@gmail.com / 123456'
+                : 'Demo shopper account: user@gmail.com / 123456'
+            }
+          />
+
           {audience === 'store' && (providerAvailability.google || providerAvailability.facebook) ? (
             <Space orientation="vertical" size={10} style={{ width: '100%' }}>
               <Typography.Text type="secondary" style={{ textAlign: 'center', display: 'block' }}>
