@@ -78,6 +78,8 @@ export interface Profile {
   fullName: string;
   userName: string;
   email: string;
+  phoneNumber: string;
+  address: string;
   role: string;
   isLocked: boolean;
   isApproved: boolean;
@@ -88,6 +90,36 @@ export interface ProfileUpdatePayload {
   fullName: string;
   userName: string;
   email: string;
+  phoneNumber: string;
+  address: string;
+}
+
+export interface AdminOrderItem {
+  id: number;
+  productId: number;
+  productName: string;
+  productImageUrl: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
+export interface AdminOrder {
+  id: number;
+  userId: number;
+  customerName: string;
+  customerEmail: string;
+  phoneNumber: string;
+  shippingAddress: string;
+  status: string;
+  paymentStatus: string;
+  currency: string;
+  totalAmount: number;
+  stripeCheckoutSessionId: string;
+  stripePaymentIntentId: string | null;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  items: AdminOrderItem[];
 }
 
 export interface AdminSession {

@@ -16,6 +16,8 @@ public record ProfileDto(
   string FullName,
   string UserName,
   string Email,
+  string PhoneNumber,
+  string Address,
   string Role,
   bool IsLocked,
   bool IsApproved,
@@ -73,4 +75,6 @@ public class UpdateProfileDto
   public string FullName { get; set; } = string.Empty;
   public string UserName { get; set; } = string.Empty;
   public string Email { get; set; } = string.Empty;
+  public string PhoneNumber { get; set; } = string.Empty;
+  public string Address { get; set; } = string.Empty;
 }

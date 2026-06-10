@@ -11,7 +11,7 @@ interface SettingsPageProps {
 
 export function SettingsPage({ session }: SettingsPageProps) {
   const { message } = App.useApp();
-  const [form] = Form.useForm<{ fullName: string; userName: string; email: string }>();
+  const [form] = Form.useForm<{ fullName: string; userName: string; email: string; phoneNumber: string; address: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -31,6 +31,8 @@ export function SettingsPage({ session }: SettingsPageProps) {
           fullName: response.fullName,
           userName: response.userName,
           email: response.email,
+          phoneNumber: response.phoneNumber,
+          address: response.address,
         });
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load profile.');
@@ -72,6 +74,8 @@ export function SettingsPage({ session }: SettingsPageProps) {
                       fullName: result.data.fullName,
                       userName: result.data.userName,
                       email: result.data.email,
+                      phoneNumber: result.data.phoneNumber,
+                      address: result.data.address,
                     });
                     message.success(result.message);
                   } catch (submitError) {
@@ -98,6 +102,19 @@ export function SettingsPage({ session }: SettingsPageProps) {
                 <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Please enter your email.' }, { type: 'email', message: 'Please enter a valid email.' }]}>
                   <Input prefix={<MailOutlined />} size="large" />
                 </Form.Item>
+
+                <Row gutter={[16, 16]}>
+                  <Col xs={24} md={12}>
+                    <Form.Item name="phoneNumber" label="Phone number" rules={[{ required: true, message: 'Please enter your phone number.' }]}>
+                      <Input size="large" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={12}>
+                    <Form.Item name="address" label="Address" rules={[{ required: true, message: 'Please enter your address.' }]}>
+                      <Input size="large" />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
                 {error ? <Alert type="error" showIcon title={error} style={{ marginBottom: 16 }} /> : null}
 

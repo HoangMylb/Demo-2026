@@ -53,6 +53,8 @@ public class ProfileController(AppDbContext context) : ControllerBase
     user.FullName = request.FullName.Trim();
     user.UserName = normalizedUserName;
     user.Email = normalizedEmail;
+    user.PhoneNumber = request.PhoneNumber.Trim();
+    user.Address = request.Address.Trim();
 
     await _context.SaveChangesAsync();
 
@@ -76,6 +78,8 @@ public class ProfileController(AppDbContext context) : ControllerBase
     user.FullName,
     user.UserName,
     user.Email,
+    user.PhoneNumber,
+    user.Address,
     user.Role,
     user.IsLocked,
     user.IsApproved,

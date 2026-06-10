@@ -1,4 +1,4 @@
-import type { CreateProductReviewPayload, ProductApiResponse, ProductDetail, ProductDetailApiResponse, ProductReview, ProductReviewHelpfulResponse, ProductType, UpdateProductReviewPayload } from '../types/product';
+import type { CheckoutPrefill, CreateCheckoutSessionPayload, CreateCheckoutSessionResponse, Order, CreateProductReviewPayload, ProductApiResponse, ProductDetail, ProductDetailApiResponse, ProductReview, ProductReviewHelpfulResponse, ProductType, UpdateProductReviewPayload } from '../types/product';
 import { getApiBaseUrl } from './api-base-url';
 
 const API_BASE_URL = getApiBaseUrl();
@@ -170,4 +170,78 @@ export async function toggleStorefrontReviewHelpful(productId: string, reviewId:
   }
 
   return (body as ApiEnvelope<ProductReviewHelpfulResponse>).data;
+}
+
+export async function getCheckoutPrefill(): Promise<CheckoutPrefill> {
+  const response = await fetch(`${API_BASE_URL}/api/orders/checkout/prefill`, {
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    throw new Error('Please sign in before checking out.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Checkout prefill request failed with status ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as ApiEnvelope<CheckoutPrefill>;
+  return payload.data;
+}
+
+export async function createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<CreateCheckoutSessionResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/orders/checkout/session`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const body = (await response.json()) as ApiEnvelope<CreateCheckoutSessionResponse> | { message?: string };
+
+  if (response.status === 401) {
+    throw new Error(body.message ?? 'Please sign in before checking out.');
+  }
+
+  if (!response.ok) {
+    throw new Error(body.message ?? `Checkout session request failed with status ${response.status}.`);
+  }
+
+  return (body as ApiEnvelope<CreateCheckoutSessionResponse>).data;
+}
+
+export async function getOrderBySessionId(sessionId: string): Promise<Order> {
+  const response = await fetch(`${API_BASE_URL}/api/orders/session/${sessionId}`, {
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    throw new Error('Please sign in to view this order.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Order request failed with status ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as ApiEnvelope<Order>;
+  return payload.data;
+}
+
+export async function getMyOrders(): Promise<Order[]> {
+  const response = await fetch(`${API_BASE_URL}/api/orders/mine`, {
+    credentials: 'include',
+  });
+
+  if (response.status === 401) {
+    throw new Error('Please sign in to view your orders.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Order history request failed with status ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as ApiEnvelope<Order[]>;
+  return payload.data;
 }

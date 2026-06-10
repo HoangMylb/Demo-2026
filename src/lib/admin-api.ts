@@ -1,4 +1,4 @@
-import type { AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
+import type { AdminOrder, AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
 import { getApiBaseUrl } from './api-base-url';
 
 const API_BASE_URL = getApiBaseUrl();
@@ -226,6 +226,10 @@ export async function getAdminUsers(): Promise<AdminUser[]> {
 
 export async function getAdminReviews(): Promise<AdminReview[]> {
   return (await request<AdminReview[]>('/api/admin/reviews')).data;
+}
+
+export async function getAdminOrders(): Promise<AdminOrder[]> {
+  return (await request<AdminOrder[]>('/api/admin/orders')).data;
 }
 
 export async function deleteAdminReview(id: number): Promise<{ message: string }> {

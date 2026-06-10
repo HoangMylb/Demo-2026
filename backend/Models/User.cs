@@ -10,7 +10,10 @@ public class User
   public string Role { get; set; } = "User";
   public bool IsLocked { get; set; }
   public bool IsApproved { get; set; }
+  public string PhoneNumber { get; set; } = string.Empty;
+  public string Address { get; set; } = string.Empty;
   public ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
   public ICollection<ProductReviewHelpfulVote> ProductReviewHelpfulVotes { get; set; } = new List<ProductReviewHelpfulVote>();
+  public ICollection<Order> Orders { get; set; } = new List<Order>();
   public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }

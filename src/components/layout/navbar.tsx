@@ -33,6 +33,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const accountMenuItems: MenuProps['items'] = isLoggedIn
     ? [
         { key: 'settings', icon: <SettingOutlined />, label: 'Settings', onClick: () => onNavigate('/settings') },
+        { key: 'orders', icon: <ShoppingCartOutlined />, label: 'My orders', onClick: () => onNavigate('/orders') },
         { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', onClick: onLogout },
       ]
     : [

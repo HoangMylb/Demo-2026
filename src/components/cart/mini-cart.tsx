@@ -1,5 +1,6 @@
 import { DeleteOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Button, Drawer, Empty, Image, List, Popconfirm, Space, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../stores/cart-store';
 import { formatCurrency } from '../../utils/format';
 
@@ -8,6 +9,7 @@ interface MiniCartProps {
 }
 
 export function MiniCart({ visible }: MiniCartProps) {
+  const navigate = useNavigate();
   const isOpen = useCartStore((state) => state.isOpen);
   const items = useCartStore((state) => state.items);
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -41,7 +43,10 @@ export function MiniCart({ visible }: MiniCartProps) {
               {formatCurrency(totalPrice)}
             </Typography.Title>
           </div>
-          <Button type="primary" size="large" block>
+          <Button type="primary" size="large" block onClick={() => {
+            toggleCart(false);
+            navigate('/checkout');
+          }}>
             Checkout
           </Button>
         </Space>
