@@ -115,7 +115,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(
                     "https://hoangmydemo.online",
                     "https://www.hoangmydemo.online",
-                    "https://demo-2026-rho.vercel.app" // Thêm cả cái này vào cho chắc cốp
+                    "https://demo-2026-rho.vercel.app" // Adding this one too just to be safe
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()

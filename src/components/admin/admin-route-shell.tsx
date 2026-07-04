@@ -9,6 +9,7 @@ const routeToView: Record<string, AdminView> = {
   '/admin/products': 'products',
   '/admin/users': 'users',
   '/admin/reviews': 'reviews',
+  '/admin/orders': 'orders',
 };
 
 export function AdminRouteShell({ onSessionCleared }: { onSessionCleared?: () => void }) {
@@ -33,7 +34,15 @@ export function AdminRouteShell({ onSessionCleared }: { onSessionCleared?: () =>
 
   const handleNavigate = (view: AdminView) => {
     const nextPath =
-      view === 'dashboard' ? '/admin' : view === 'products' ? '/admin/products' : view === 'users' ? '/admin/users' : '/admin/reviews';
+      view === 'dashboard'
+        ? '/admin'
+        : view === 'products'
+          ? '/admin/products'
+          : view === 'users'
+            ? '/admin/users'
+            : view === 'reviews'
+              ? '/admin/reviews'
+              : '/admin/orders';
     navigate(nextPath);
   };
 

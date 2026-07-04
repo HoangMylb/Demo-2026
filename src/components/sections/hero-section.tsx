@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-const fullHeadline = 'Design-forward gear for modern digital living.';
+const fullHeadline = 'Next.js SaaS MVP Developer';
 
 interface HeroSectionProps {
   onExploreProducts: () => void;
@@ -21,16 +21,25 @@ export function HeroSection({ onExploreProducts }: HeroSectionProps) {
       if (currentIndex >= fullHeadline.length) {
         window.clearInterval(interval);
       }
-    }, 42);
+    }, 50);
 
     return () => window.clearInterval(interval);
   }, []);
 
   const highlights = useMemo(
     () => [
-      'Framer Motion micro-interactions',
-      'Zustand cart persistence',
-      'Strictly typed form flows',
+      {
+        title: 'Next.js & Fullstack Expert',
+        description: 'React Server Components, optimized rendering paths, and clean layout structures for top performance.',
+      },
+      {
+        title: 'Production-Ready Stack',
+        description: 'Supabase/PostgreSQL database modeling, secure JWT auth flows, and stable API integrations.',
+      },
+      {
+        title: '2-4 Week MVP Delivery',
+        description: 'Fast, structured development cycles producing a clean, scalable codebase to launch quickly.',
+      },
     ],
     [],
   );
@@ -57,8 +66,8 @@ export function HeroSection({ onExploreProducts }: HeroSectionProps) {
               color: 'var(--color-brand-700)',
             }}
           >
-            <Sparkles className="h-4 w-4" />
-            Built for a 24-hour polished sprint
+            <Sparkles className="h-4 w-4 text-fuchsia-500 animate-pulse" />
+            Focusing on Speed, UX, and Clean Architecture
           </motion.div>
 
           <h2 className="mt-6 max-w-2xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl" style={{ color: 'var(--color-text-primary)' }}>
@@ -80,22 +89,24 @@ export function HeroSection({ onExploreProducts }: HeroSectionProps) {
           </h2>
 
           <p className="mt-6 max-w-xl text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-            Launch a premium storefront with clean architecture, smooth dark mode, expressive motion, and typed state that scales.
+            I build high-performance SaaS MVPs that launch in weeks. Transforming complex business ideas into polished, production-ready fullstack applications.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Button type="primary" size="large" onClick={onExploreProducts}>
-              Shop the collection
+              Explore Live Demos
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="large">Watch product story</Button>
+            <Button size="large" onClick={() => window.open('mailto:contact@hoangmy.online')}>
+              Get in Touch
+            </Button>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
           {highlights.map((item, index) => (
             <motion.div
-              key={item}
+              key={item.title}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.12 }}
@@ -106,9 +117,9 @@ export function HeroSection({ onExploreProducts }: HeroSectionProps) {
               }}
             >
               <p className="text-sm font-medium" style={{ color: 'var(--color-brand-600)' }}>0{index + 1}</p>
-              <h3 className="mt-3 text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item}</h3>
+              <h3 className="mt-3 text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{item.title}</h3>
               <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                Production-minded UI composition with thoughtful defaults and smooth user feedback.
+                {item.description}
               </p>
             </motion.div>
           ))}

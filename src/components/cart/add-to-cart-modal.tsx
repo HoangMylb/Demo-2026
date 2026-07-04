@@ -35,9 +35,9 @@ export function AddToCartModal({ product, open, onCancel, onConfirm }: AddToCart
       onCancel={onCancel}
       footer={
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-          <Button onClick={onCancel}>Huỷ</Button>
+          <Button onClick={onCancel}>Cancel</Button>
           <Button type="primary" onClick={handleConfirm}>
-            Thêm
+            Add
           </Button>
         </div>
       }
@@ -72,7 +72,7 @@ export function AddToCartModal({ product, open, onCancel, onConfirm }: AddToCart
         </div>
 
         <Space orientation="vertical" size={8} align="center">
-          <Typography.Text strong>Số lượng</Typography.Text>
+          <Typography.Text strong>Quantity</Typography.Text>
           <Space.Compact>
             <Button
               aria-label="Decrease quantity"

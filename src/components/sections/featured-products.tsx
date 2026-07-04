@@ -14,11 +14,11 @@ export function FeaturedProducts({ products, onViewDetails, onAddToCart }: Featu
     <section className="mt-16">
       <div className="mb-8 flex items-end justify-between gap-6">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.28em]" style={{ color: 'var(--color-brand-600)' }}>Featured products</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Curated to feel premium at first glance</h2>
+          <p className="text-sm font-medium uppercase tracking-[0.28em]" style={{ color: 'var(--color-brand-600)' }}>Featured Projects</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Live Project Demos & Prototypes</h2>
         </div>
         <p className="max-w-md text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          These cards now come from the live storefront products API so homepage inventory matches the backend.
+          Explore fully integrated frontend modules communicating with a live ASP.NET Core API and Supabase database.
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-3">

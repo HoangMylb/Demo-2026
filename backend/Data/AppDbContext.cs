@@ -100,10 +100,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
       .HasMaxLength(500);
 
     modelBuilder.Entity<Order>()
-      .HasIndex(order => order.StripeCheckoutSessionId)
-      .IsUnique();
-
-    modelBuilder.Entity<Order>()
       .Property(order => order.Status)
       .HasMaxLength(32);
 

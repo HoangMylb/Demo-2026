@@ -15,6 +15,7 @@ export function CheckoutPage({ session }: CheckoutPageProps) {
   const navigate = useNavigate();
   const items = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalPrice);
+  const clearCart = useCartStore((state) => state.clearCart);
   const [form] = Form.useForm<{ fullName: string; email: string; phoneNumber: string; address: string }>();
   const [submitting, setSubmitting] = useState(false);
 
@@ -88,7 +89,7 @@ export function CheckoutPage({ session }: CheckoutPageProps) {
                     };
                   });
 
-                  const response = await createCheckoutSession({
+                  await createCheckoutSession({
                     ...values,
                     fullName: values.fullName.trim(),
                     email: values.email.trim(),
@@ -97,7 +98,9 @@ export function CheckoutPage({ session }: CheckoutPageProps) {
                     items: checkoutItems,
                   });
 
-                  window.location.href = response.checkoutUrl;
+                  clearCart();
+                  message.success('Payment completed successfully. Your demo order has been created.');
+                  navigate('/orders');
                 } catch (error) {
                   message.error(error instanceof Error ? error.message : 'Unable to start checkout right now.');
                 } finally {
@@ -120,7 +123,7 @@ export function CheckoutPage({ session }: CheckoutPageProps) {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button type="primary" htmlType="submit" size="large" loading={submitting}>
-                  Continue to payment
+                  Complete demo order
                 </Button>
               </div>
             </Form>

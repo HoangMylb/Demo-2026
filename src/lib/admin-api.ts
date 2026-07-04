@@ -1,4 +1,4 @@
-import type { AdminOrder, AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
+import type { AdminOrder, AdminOrderStatus, AdminProduct, AdminReview, AdminSession, AdminStats, AdminUser, CreateAdminUserPayload, ProductPayload, Profile, ProfileUpdatePayload, UserAccessPayload } from '../types/admin';
 import { getApiBaseUrl } from './api-base-url';
 
 const API_BASE_URL = getApiBaseUrl();
@@ -230,6 +230,14 @@ export async function getAdminReviews(): Promise<AdminReview[]> {
 
 export async function getAdminOrders(): Promise<AdminOrder[]> {
   return (await request<AdminOrder[]>('/api/admin/orders')).data;
+}
+
+export async function updateAdminOrderStatus(id: number, status: AdminOrderStatus): Promise<ApiResult<AdminOrder>> {
+  return request<AdminOrder>(`/api/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+}
+
+export async function deleteAdminOrder(id: number): Promise<{ message: string }> {
+  return requestWithoutJson(`/api/admin/orders/${id}`, { method: 'DELETE' });
 }
 
 export async function deleteAdminReview(id: number): Promise<{ message: string }> {

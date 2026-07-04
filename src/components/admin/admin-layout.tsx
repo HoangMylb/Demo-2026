@@ -1,4 +1,4 @@
-import { AppstoreOutlined, LogoutOutlined, MenuOutlined, MessageOutlined, SettingOutlined, ShopOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, LogoutOutlined, MenuOutlined, MessageOutlined, SettingOutlined, ShopOutlined, ShoppingOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Dropdown, Grid, Layout, Menu, Space, Tag, theme, Typography } from 'antd';
 import { useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 import { AdminFooter } from './admin-footer';
@@ -6,7 +6,7 @@ import { ThemeToggle } from '../layout/theme-toggle';
 
 const { Header, Content, Sider } = Layout;
 
-export type AdminView = 'dashboard' | 'products' | 'users' | 'reviews';
+export type AdminView = 'dashboard' | 'products' | 'users' | 'reviews' | 'orders';
 
 interface AdminLayoutProps extends PropsWithChildren {
   activeView: AdminView;
@@ -35,6 +35,7 @@ export function AdminLayout({ activeView, onNavigate, onLogout, onOpenSettings, 
         { key: 'products', icon: <ShopOutlined />, label: 'Products' },
         { key: 'users', icon: <TeamOutlined />, label: 'Users' },
         { key: 'reviews', icon: <MessageOutlined />, label: 'Reviews' },
+        { key: 'orders', icon: <ShoppingOutlined />, label: 'Orders' },
       ],
     [],
   );

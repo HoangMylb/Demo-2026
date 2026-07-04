@@ -19,8 +19,6 @@ const ProductsPage = lazy(() => import('./pages/products-page').then((module) =>
 const ProductDetailPage = lazy(() => import('./pages/product-detail-page').then((module) => ({ default: module.ProductDetailPage })));
 const AuthPage = lazy(() => import('./pages/auth-page').then((module) => ({ default: module.AuthPage }))); 
 const CheckoutPage = lazy(() => import('./pages/checkout-page').then((module) => ({ default: module.CheckoutPage }))); 
-const CheckoutSuccessPage = lazy(() => import('./pages/checkout-success-page').then((module) => ({ default: module.CheckoutSuccessPage }))); 
-const CheckoutFailedPage = lazy(() => import('./pages/checkout-failed-page').then((module) => ({ default: module.CheckoutFailedPage }))); 
 const OrdersPage = lazy(() => import('./pages/orders-page').then((module) => ({ default: module.OrdersPage }))); 
 const SettingsPage = lazy(() => import('./pages/settings-page').then((module) => ({ default: module.SettingsPage }))); 
 const NotFoundPage = lazy(() => import('./pages/not-found-page').then((module) => ({ default: module.NotFoundPage })));
@@ -260,22 +258,6 @@ function OrdersHistoryRoute({ session, onLogout }: { session: AdminSession | nul
   );
 }
 
-function CheckoutSuccessRoute({ session, onLogout }: { session: AdminSession | null; onLogout: () => void }) {
-  return (
-    <StoreShell session={session} onLogout={onLogout}>
-      <CheckoutSuccessPage />
-    </StoreShell>
-  );
-}
-
-function CheckoutFailedRoute({ session, onLogout }: { session: AdminSession | null; onLogout: () => void }) {
-  return (
-    <StoreShell session={session} onLogout={onLogout}>
-      <CheckoutFailedPage />
-    </StoreShell>
-  );
-}
-
 function NotFoundRoute({ session, onLogout }: { session: AdminSession | null; onLogout: () => void }) {
   return (
     <StoreShell session={session} onLogout={onLogout}>
@@ -365,8 +347,6 @@ function AppContent() {
               element={<AuthRoute onAuthSuccess={syncSession} session={session} onLogout={handleLogout} />}
             />
             <Route path="/checkout" element={<CheckoutRoute session={session} onLogout={handleLogout} />} />
-            <Route path="/checkout/success" element={<CheckoutSuccessRoute session={session} onLogout={handleLogout} />} />
-            <Route path="/checkout/failed" element={<CheckoutFailedRoute session={session} onLogout={handleLogout} />} />
             <Route path="/orders" element={<OrdersHistoryRoute session={session} onLogout={handleLogout} />} />
             <Route path="/settings" element={<SettingsRoute session={session} onLogout={handleLogout} />} />
             <Route path="/unauthorized" element={<UnauthorizedRoute session={session} onLogout={handleLogout} />} />

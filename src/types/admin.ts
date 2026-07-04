@@ -115,12 +115,12 @@ export interface AdminOrder {
   paymentStatus: string;
   currency: string;
   totalAmount: number;
-  stripeCheckoutSessionId: string;
-  stripePaymentIntentId: string | null;
   createdAtUtc: string;
   updatedAtUtc: string;
   items: AdminOrderItem[];
 }
+
+export type AdminOrderStatus = 'Order' | 'Processing' | 'Shipping' | 'Delivered' | 'Cancelled';
 
 export interface AdminSession {
   isAuthenticated: boolean;

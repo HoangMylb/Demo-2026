@@ -199,7 +199,14 @@ export async function createCheckoutSession(payload: CreateCheckoutSessionPayloa
     body: JSON.stringify(payload),
   });
 
-  const body = (await response.json()) as ApiEnvelope<CreateCheckoutSessionResponse> | { message?: string };
+  let body: ApiEnvelope<CreateCheckoutSessionResponse> | { message?: string };
+
+  try {
+    body = (await response.json()) as ApiEnvelope<CreateCheckoutSessionResponse> | { message?: string };
+  } catch {
+    const text = await response.text();
+    throw new Error(text || `Checkout session request failed with status ${response.status}.`);
+  }
 
   if (response.status === 401) {
     throw new Error(body.message ?? 'Please sign in before checking out.');
@@ -210,23 +217,6 @@ export async function createCheckoutSession(payload: CreateCheckoutSessionPayloa
   }
 
   return (body as ApiEnvelope<CreateCheckoutSessionResponse>).data;
-}
-
-export async function getOrderBySessionId(sessionId: string): Promise<Order> {
-  const response = await fetch(`${API_BASE_URL}/api/orders/session/${sessionId}`, {
-    credentials: 'include',
-  });
-
-  if (response.status === 401) {
-    throw new Error('Please sign in to view this order.');
-  }
-
-  if (!response.ok) {
-    throw new Error(`Order request failed with status ${response.status}.`);
-  }
-
-  const payload = (await response.json()) as ApiEnvelope<Order>;
-  return payload.data;
 }
 
 export async function getMyOrders(): Promise<Order[]> {

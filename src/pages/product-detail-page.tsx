@@ -299,9 +299,9 @@ export function ProductDetailPage({ product, onAddToCart, onViewDetails, session
                     style={{ width: 160, display: 'block', marginTop: 6 }}
                     onChange={setSortBy}
                     options={[
-                      { value: 'newest', label: 'Mới nhất' },
-                      { value: 'helpful', label: 'Hữu ích nhất' },
-                      { value: 'rating', label: 'Nhiều sao nhất' },
+                      { value: 'newest', label: 'Newest' },
+                      { value: 'helpful', label: 'Most helpful' },
+                      { value: 'rating', label: 'Highest rated' },
                     ]}
                   />
                 </div>

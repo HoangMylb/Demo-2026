@@ -26,9 +26,14 @@ public class CreateCheckoutSessionDto
 
 public record CreateCheckoutSessionResponseDto(
   int OrderId,
-  string CheckoutUrl,
-  string StripeCheckoutSessionId
+  string Status,
+  string PaymentStatus
 );
+
+public class UpdateOrderStatusDto
+{
+  public string Status { get; set; } = string.Empty;
+}
 
 public record OrderItemDto(
   int Id,
@@ -51,8 +56,6 @@ public record OrderDto(
   string PaymentStatus,
   string Currency,
   decimal TotalAmount,
-  string StripeCheckoutSessionId,
-  string? StripePaymentIntentId,
   DateTime CreatedAtUtc,
   DateTime UpdatedAtUtc,
   IReadOnlyList<OrderItemDto> Items

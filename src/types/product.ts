@@ -98,8 +98,8 @@ export interface CreateCheckoutSessionPayload {
 
 export interface CreateCheckoutSessionResponse {
   orderId: number;
-  checkoutUrl: string;
-  stripeCheckoutSessionId: string;
+  status: string;
+  paymentStatus: string;
 }
 
 export interface OrderItem {
@@ -123,8 +123,6 @@ export interface Order {
   paymentStatus: string;
   currency: string;
   totalAmount: number;
-  stripeCheckoutSessionId: string;
-  stripePaymentIntentId: string | null;
   createdAtUtc: string;
   updatedAtUtc: string;
   items: OrderItem[];
