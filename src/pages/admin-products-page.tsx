@@ -258,7 +258,7 @@ export function AdminProductsPage({
           }}
         >
           <Form.Item name="name" label="Product name" rules={[{ required: true, message: 'Please enter the product name.' }]}>
-            <Input placeholder="Luma Air Headphones" />
+            <Input placeholder="Wireless Bluetooth Headphones" />
           </Form.Item>
 
           <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: 'Please select a category.' }]}>

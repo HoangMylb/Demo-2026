@@ -71,10 +71,10 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
       >
         <button type="button" onClick={() => onNavigate('/')} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
           <Typography.Text style={{ textTransform: 'uppercase', letterSpacing: '0.28em', fontSize: 12, color: 'var(--color-brand-600)' }}>
-            Luma Commerce
+            E-commerce MVP
           </Typography.Text>
           <Typography.Title level={5} style={{ margin: 0, color: 'var(--color-text-primary)' }}>
-            Interactive Storefront
+            with Admin Dashboard
           </Typography.Title>
         </button>
 

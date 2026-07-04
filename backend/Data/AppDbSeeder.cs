@@ -28,7 +28,7 @@ public static class AppDbSeeder
     {
       new Product
       {
-        Name = "Luma Air Headphones",
+        Name = "Air Pulse Headphones",
         Description = "Adaptive noise canceling headphones with spatial audio tuning.",
         Price = 249,
         ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80",

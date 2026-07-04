@@ -24,10 +24,10 @@ export function SiteFooter() {
           <Space wrap size={[12, 12]} style={{ justifyContent: 'space-between', width: '100%' }}>
             <div>
               <Typography.Text style={{ textTransform: 'uppercase', letterSpacing: '0.26em', fontSize: 12, color: 'var(--color-brand-600)' }}>
-                Luma Commerce
+                E-commerce MVP
               </Typography.Text>
               <Typography.Title level={4} style={{ margin: '6px 0 0', color: 'var(--color-text-primary)' }}>
-                Storefront
+                Admin Dashboard
               </Typography.Title>
             </div>
 
@@ -42,7 +42,7 @@ export function SiteFooter() {
 
           <Space wrap size={[16, 8]} style={{ justifyContent: 'space-between', width: '100%' }}>
             <Typography.Text style={{ color: 'var(--color-text-muted)' }}>
-              © 2026 Luma Commerce Portfolio Demo
+              © 2026 E-commerce MVP with Admin Dashboard
             </Typography.Text>
           </Space>
         </Space>
