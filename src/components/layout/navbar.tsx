@@ -25,7 +25,7 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
   const navigationItems = useMemo(
     () => (isAdmin ? [{ key: '/admin', label: 'Dashboard' }] : [
       { key: '/', label: 'Home' },
-      { key: '/products', label: 'Projects' },
+      { key: '/products', label: 'Products' },
     ]),
     [isAdmin],
   );
@@ -71,10 +71,10 @@ export function Navbar({ currentPath, onNavigate, session, onLogout }: NavbarPro
       >
         <button type="button" onClick={() => onNavigate('/')} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: 'pointer' }}>
           <Typography.Text style={{ textTransform: 'uppercase', letterSpacing: '0.28em', fontSize: 12, color: 'var(--color-brand-600)' }}>
-            Hoang My
+            Luma Commerce
           </Typography.Text>
           <Typography.Title level={5} style={{ margin: 0, color: 'var(--color-text-primary)' }}>
-            SaaS MVP Developer
+            Interactive Storefront
           </Typography.Title>
         </button>
 

@@ -24,18 +24,17 @@ export function SiteFooter() {
           <Space wrap size={[12, 12]} style={{ justifyContent: 'space-between', width: '100%' }}>
             <div>
               <Typography.Text style={{ textTransform: 'uppercase', letterSpacing: '0.26em', fontSize: 12, color: 'var(--color-brand-600)' }}>
-                Hoang My Portfolio
+                Luma Commerce
               </Typography.Text>
               <Typography.Title level={4} style={{ margin: '6px 0 0', color: 'var(--color-text-primary)' }}>
-                SaaS MVP Developer
+                Storefront
               </Typography.Title>
             </div>
 
             <Space wrap>
               <Tag color="blue">React + Vite</Tag>
-              <Tag color="cyan">.NET 9.0 API</Tag>
-              <Tag color="purple">Supabase Postgres</Tag>
-              <Tag color="orange">Ant Design</Tag>
+              <Tag color="cyan">Ant Design</Tag>
+              <Tag color="purple">Tailwind tokens</Tag>
             </Space>
           </Space>
 
@@ -43,7 +42,7 @@ export function SiteFooter() {
 
           <Space wrap size={[16, 8]} style={{ justifyContent: 'space-between', width: '100%' }}>
             <Typography.Text style={{ color: 'var(--color-text-muted)' }}>
-              © 2026 Hoang My. All rights reserved.
+              © 2026 Luma Commerce Portfolio Demo
             </Typography.Text>
           </Space>
         </Space>

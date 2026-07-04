@@ -44,7 +44,7 @@ export function ProductsPage({ products, onViewDetails, onAddToCart }: ProductsP
     <section>
       <div className="mb-8">
         <h2 className="mt-3 text-3xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
-          Featured Projects & SaaS Demos
+          Products
         </h2>
       </div>
 
