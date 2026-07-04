@@ -47,10 +47,6 @@ function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => voi
     void getCurrentSession().then(setSession).catch(() => setSession(null));
   }, []);
 
-  if (session?.role?.toLowerCase() === 'admin') {
-    return <Navigate to="/admin" replace state={{ from: location }} />;
-  }
-
   useEffect(() => {
     let active = true;
 
@@ -73,6 +69,10 @@ function HomeRoute({ onAddToCart }: { onAddToCart: (product: ProductType) => voi
       active = false;
     };
   }, []);
+
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
 
   return (
     <HomePage
@@ -94,10 +94,6 @@ function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) =>
     void getCurrentSession().then(setSession).catch(() => setSession(null));
   }, []);
 
-  if (session?.role?.toLowerCase() === 'admin') {
-    return <Navigate to="/admin" replace state={{ from: location }} />;
-  }
-
   useEffect(() => {
     let active = true;
 
@@ -121,6 +117,10 @@ function ProductsRoute({ onAddToCart }: { onAddToCart: (product: ProductType) =>
     };
   }, []);
 
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
+
   return (
     <ProductsPage
       products={products}
@@ -135,10 +135,6 @@ function ProductDetailRoute({ onAddToCart, session }: { onAddToCart: (product: P
   const navigate = useNavigate();
   const location = useLocation();
   const [product, setProduct] = useState<ProductDetail | null>(null);
-
-  if (session?.role?.toLowerCase() === 'admin') {
-    return <Navigate to="/admin" replace state={{ from: location }} />;
-  }
 
   useEffect(() => {
     let active = true;
@@ -169,6 +165,10 @@ function ProductDetailRoute({ onAddToCart, session }: { onAddToCart: (product: P
       active = false;
     };
   }, [productId]);
+
+  if (session?.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace state={{ from: location }} />;
+  }
 
   return <ProductDetailPage product={product} onAddToCart={onAddToCart} onViewDetails={(nextProduct) => navigate(`/products/${nextProduct.id}`)} session={session} onReviewCreated={async () => {
     if (!productId) {
